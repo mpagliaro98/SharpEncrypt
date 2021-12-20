@@ -68,26 +68,28 @@ namespace SharpEncrypt
                 return;
             }
 
+            byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
+                loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
             var aes = new AesCryptographyService(textboxPassword.Text.Trim());
-            for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.NUM_BYTES)
+            for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
             {
                 progressBar.Value = (i / loadedFile.Length) * 100;
-                byte[] current = new byte[AesCryptographyService.NUM_BYTES];
-                for (int j = 0; j < AesCryptographyService.NUM_BYTES; ++j)
+                byte[] current = new byte[AesCryptographyService.BLOCK_SIZE];
+                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
                 {
                     if (i + j < loadedFile.Length)
                         current[j] = loadedFile[i + j];
                     else
-                        current[j] = 0;
+                        current[j] = 0;  // pad final block with zeroes
                 }
                 byte[] encrypted = aes.Encrypt(current);
-                for (int j = 0; j < AesCryptographyService.NUM_BYTES; ++j)
+                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
                 {
-                    if (i + j < loadedFile.Length)
-                        loadedFile[i + j] = encrypted[j];
+                    if (i + j < result.Length)
+                        result[i + j] = encrypted[j];
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.NUM_BYTES.ToString() + " bytes.");
+                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.BLOCK_SIZE.ToString() + " bytes.");
                         break;
                     }
                 }
@@ -107,12 +109,14 @@ namespace SharpEncrypt
                 return;
             }
 
+            byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
+                loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
             var aes = new AesCryptographyService(textboxPassword.Text.Trim());
-            for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.NUM_BYTES)
+            for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
             {
                 progressBar.Value = (i / loadedFile.Length) * 100;
-                byte[] current = new byte[AesCryptographyService.NUM_BYTES];
-                for (int j = 0; j < AesCryptographyService.NUM_BYTES; ++j)
+                byte[] current = new byte[AesCryptographyService.BLOCK_SIZE];
+                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
                 {
                     if (i + j < loadedFile.Length)
                         current[j] = loadedFile[i + j];
@@ -120,14 +124,13 @@ namespace SharpEncrypt
                         current[j] = 0;
                 }
                 byte[] encrypted = aes.Decrypt(current);
-                // LAST 16 BYTES GET CORRUPTED WHEN DECRYPTING IF IT IS NOT 16 TOTAL
-                for (int j = 0; j < AesCryptographyService.NUM_BYTES; ++j)
+                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
                 {
-                    if (i + j < loadedFile.Length)
-                        loadedFile[i + j] = encrypted[j];
+                    if (i + j < result.Length)
+                        result[i + j] = encrypted[j];
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.NUM_BYTES.ToString() + " bytes.");
+                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.BLOCK_SIZE.ToString() + " bytes.");
                         break;
                     }
                 }
