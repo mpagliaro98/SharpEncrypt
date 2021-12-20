@@ -13,6 +13,7 @@
             <TextBox x:Name="textboxPassword" />
             <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center">Encrypt</Button>
             <Button Name="btnDecrypt" Click="btnDecrypt_Click" HorizontalAlignment="Center">Decrypt</Button>
+            <CheckBox x:Name="checkboxEncryptFilename" HorizontalAlignment="Center" Content="Encrypt filename" IsChecked="True" />
             <ProgressBar x:Name="progressBar" Height="25" />
         </StackPanel>
     </Grid>

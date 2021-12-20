@@ -68,7 +68,7 @@ namespace SharpEncrypt
                 return;
             }
 
-            var result = fileEncryptor.EncryptFile(password);
+            var result = fileEncryptor.EncryptFile(password, checkboxEncryptFilename.IsChecked.Value);
             if (!result)
             {
                 MessageBox.Show("Something went wrong.");

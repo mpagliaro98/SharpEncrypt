@@ -9,6 +9,8 @@ namespace SharpEncrypt
 {
     public static class Util
     {
+        private static Random random = new Random();
+
         public static byte[] ConcatByteArrays(byte[] first, byte[] second)
         {
             byte[] ret = new byte[first.Length + second.Length];
@@ -33,6 +35,12 @@ namespace SharpEncrypt
                     return false;
             }
             return true;
+        }
+
+        public static string GenerateRandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

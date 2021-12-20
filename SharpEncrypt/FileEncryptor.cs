@@ -47,7 +47,7 @@ namespace SharpEncrypt
             return encrypted.SequenceEqual(header.Checksum);
         }
 
-        public bool EncryptFile(string password)
+        public bool EncryptFile(string password, bool encryptFilename)
         {
             // Make sure encrypted result is a size divisible by the block size
             byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
@@ -89,7 +89,8 @@ namespace SharpEncrypt
             }
 
             string directory = Path.GetDirectoryName(filepath);
-            File.WriteAllBytes(Path.Combine(directory, header.FileName + EXT_ENCRYPTED), Util.ConcatByteArrays(header.GetHeader(), result));
+            string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
+            File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(header.GetHeader(), result));
             File.Delete(filepath);
             return true;
         }
