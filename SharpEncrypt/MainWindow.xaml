@@ -1,0 +1,19 @@
+﻿<Window x:Class="SharpEncrypt.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SharpEncrypt"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel Margin="10">
+            <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center">Open file</Button>
+            <Label x:Name="labelName" Content="Selected: " HorizontalAlignment="Center" />
+            <TextBox x:Name="textboxPassword" />
+            <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center">Encrypt</Button>
+            <Button Name="btnDecrypt" Click="btnDecrypt_Click" HorizontalAlignment="Center">Decrypt</Button>
+            <ProgressBar x:Name="progressBar" Height="25" />
+        </StackPanel>
+    </Grid>
+</Window>
