@@ -8,6 +8,7 @@ namespace SharpEncrypt
 {
     public class Header
     {
+        private static readonly byte[] IDENTIFIER = new byte[] { 0x22, 0x6B, 0x16, 0x59 };
         private static readonly byte[] DELIM = new byte[] { 0x93, 0x6D, 0xE6 };
         private static readonly byte[] END = new byte[] { 0x1F, 0xAA, 0x9C };
 
@@ -31,7 +32,7 @@ namespace SharpEncrypt
         {
             get
             {
-                return (ushort)(sizeof(ushort) + sizeof(byte) +
+                return (ushort)(IDENTIFIER.Length + sizeof(ushort) + sizeof(byte) +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + checksum.Length +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + sizeof(int) +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + Encoding.UTF8.GetByteCount(extension) +
@@ -70,6 +71,7 @@ namespace SharpEncrypt
 
         public byte[] GetHeader()
         {
+            // 4 bytes - identifier
             // 2 bytes - size of entire header
             // 1 byte - software version
             // Repeat:
@@ -79,13 +81,16 @@ namespace SharpEncrypt
             //     X bytes - data for that header code
             // 3 bytes - end
 
+            int idx = 0;
             byte[] result = new byte[HeaderSize];
+            Array.Copy(IDENTIFIER, 0, result, 0, IDENTIFIER.Length);
+            idx += IDENTIFIER.Length;
             byte[] headerSize = BitConverter.GetBytes(HeaderSize);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(headerSize);
-            Array.Copy(headerSize, 0, result, 0, sizeof(ushort));
-            result[2] = CURRENT_VERSION;
-            int idx = 3;
+            Array.Copy(headerSize, 0, result, idx, sizeof(ushort));
+            idx += sizeof(ushort);
+            result[idx++] = CURRENT_VERSION;
 
             // Checksum
             Array.Copy(DELIM, 0, result, idx, DELIM.Length);
@@ -144,16 +149,20 @@ namespace SharpEncrypt
 
         public void ParseHeader(byte[] loadedFile)
         {
+            if (!Util.MatchByteSequence(loadedFile, 0, IDENTIFIER))
+                throw new Exception("This file is not recognized as an encrypted file and cannot be decrypted.");
+
+            int idx = IDENTIFIER.Length;
             byte[] contentStartIdxBytes = new byte[sizeof(ushort)];
             Array.Copy(loadedFile, 0, contentStartIdxBytes, 0, sizeof(ushort));
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(contentStartIdxBytes);
             contentStartIdx = BitConverter.ToUInt16(contentStartIdxBytes, 0);
-            byte version = loadedFile[2];
+            idx += sizeof(ushort);
+            byte version = loadedFile[idx++];
             if (version > CURRENT_VERSION)
                 throw new Exception("This file cannot be opened with this version of SharpEncrypt. Please use a later version.");
 
-            int idx = 3;
             while (idx < loadedFile.Length)
             {
                 if (NextBytesAreEnd(loadedFile, idx))
