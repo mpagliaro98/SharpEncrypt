@@ -9,6 +9,8 @@ namespace SharpEncrypt
 {
     public class FileEncryptor
     {
+        private const string EXT_ENCRYPTED = ".senc";
+
         private string filepath = "";
         private byte[] loadedFile;
         private Header header = new Header();
@@ -86,7 +88,9 @@ namespace SharpEncrypt
                 }
             }
 
-            File.WriteAllBytes(filepath, Util.ConcatByteArrays(header.GetHeader(), result));
+            string directory = Path.GetDirectoryName(filepath);
+            File.WriteAllBytes(Path.Combine(directory, header.FileName + EXT_ENCRYPTED), Util.ConcatByteArrays(header.GetHeader(), result));
+            File.Delete(filepath);
             return true;
         }
 
@@ -140,7 +144,9 @@ namespace SharpEncrypt
                 }
             }
 
-            File.WriteAllBytes(filepath, result);
+            string directory = Path.GetDirectoryName(filepath);
+            File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
+            File.Delete(filepath);
             return true;
         }
     }
