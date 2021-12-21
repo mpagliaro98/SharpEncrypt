@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SharpEncrypt"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        mc:Ignorable="d" Name="PrimaryWindow"
+        Title="SharpEncrypt" Height="250" Width="300">
     <Grid>
         <StackPanel Margin="10">
             <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center">Open file</Button>
@@ -14,7 +14,7 @@
             <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center">Encrypt</Button>
             <Button Name="btnDecrypt" Click="btnDecrypt_Click" HorizontalAlignment="Center">Decrypt</Button>
             <CheckBox x:Name="checkboxEncryptFilename" HorizontalAlignment="Center" Content="Encrypt filename" IsChecked="True" />
-            <ProgressBar x:Name="progressBar" Height="25" />
+            <ProgressBar x:Name="progressBar" Height="25" Minimum="0" Maximum="100" />
         </StackPanel>
     </Grid>
 </Window>

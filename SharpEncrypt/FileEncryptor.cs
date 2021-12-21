@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -47,7 +48,7 @@ namespace SharpEncrypt
             return encrypted.SequenceEqual(header.Checksum);
         }
 
-        public bool EncryptFile(string password, bool encryptFilename)
+        public bool EncryptFile(string password, bool encryptFilename, BackgroundWorker worker)
         {
             // Make sure encrypted result is a size divisible by the block size
             byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
@@ -86,6 +87,11 @@ namespace SharpEncrypt
                         break;
                     }
                 }
+
+                int block = i + AesCryptographyService.BLOCK_SIZE;
+                double proportion = (double)block / loadedFile.Length;
+                double progress = proportion * 100;
+                worker.ReportProgress((int)progress);
             }
 
             string directory = Path.GetDirectoryName(filepath);
@@ -95,7 +101,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public bool DecryptFile(string password)
+        public bool DecryptFile(string password, BackgroundWorker worker)
         {
             try
             {
@@ -143,6 +149,11 @@ namespace SharpEncrypt
                         break;
                     }
                 }
+
+                int block = i + AesCryptographyService.BLOCK_SIZE;
+                double proportion = (double)(block - headerSize) / (loadedFile.Length - headerSize);
+                double progress = proportion * 100;
+                worker.ReportProgress((int)progress);
             }
 
             string directory = Path.GetDirectoryName(filepath);

@@ -71,19 +71,46 @@ namespace SharpEncrypt
                 return;
             }
 
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = true;
+            worker.DoWork += worker_DoWorkEncrypt;
+            worker.ProgressChanged += worker_ProgressChangedEncrypt;
+            worker.RunWorkerCompleted += worker_RunWorkerCompletedEncrypt;
+            worker.RunWorkerAsync(argument: new Tuple<List<FileEncryptor>, string, bool>(fileEncryptors, password, checkboxEncryptFilename.IsChecked.Value));
+            PrimaryWindow.IsEnabled = false;
+        }
+
+        private void worker_DoWorkEncrypt(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Tuple<List<FileEncryptor>, string, bool> args = e.Argument as Tuple<List<FileEncryptor>, string, bool>;
+            List<FileEncryptor> fileEncryptors = args.Item1;
+            string password = args.Item2;
+            bool encryptFilename = args.Item3;
+
             string output = "";
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
                 output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.EncryptFile(password, checkboxEncryptFilename.IsChecked.Value);
+                var result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
                 if (result)
                     output += "Successfully encrypted.";
                 else
                     output += "Something went wrong.";
                 output += "\n";
             }
-            MessageBox.Show(output);
+            e.Result = output;
+        }
 
+        private void worker_ProgressChangedEncrypt(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar.Value = e.ProgressPercentage;
+        }
+
+        private void worker_RunWorkerCompletedEncrypt(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show(e.Result.ToString());
+            PrimaryWindow.IsEnabled = true;
             Reset();
         }
 
@@ -96,19 +123,45 @@ namespace SharpEncrypt
                 return;
             }
 
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = true;
+            worker.DoWork += worker_DoWorkDecrypt;
+            worker.ProgressChanged += worker_ProgressChangedDecrypt;
+            worker.RunWorkerCompleted += worker_RunWorkerCompletedDecrypt;
+            worker.RunWorkerAsync(argument: new Tuple<List<FileEncryptor>, string>(fileEncryptors, password));
+            PrimaryWindow.IsEnabled = false;
+        }
+
+        private void worker_DoWorkDecrypt(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Tuple<List<FileEncryptor>, string> args = e.Argument as Tuple<List<FileEncryptor>, string>;
+            List<FileEncryptor> fileEncryptors = args.Item1;
+            string password = args.Item2;
+
             string output = "";
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
                 output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.DecryptFile(password);
+                var result = fileEncryptor.DecryptFile(password, worker);
                 if (result)
                     output += "Successfully decrypted.";
                 else
                     output += fileEncryptor.Message;
                 output += "\n";
             }
-            MessageBox.Show(output);
+            e.Result = output;
+        }
 
+        private void worker_ProgressChangedDecrypt(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar.Value = e.ProgressPercentage;
+        }
+
+        private void worker_RunWorkerCompletedDecrypt(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show(e.Result.ToString());
+            PrimaryWindow.IsEnabled = true;
             Reset();
         }
     }
