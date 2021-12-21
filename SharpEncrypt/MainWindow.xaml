@@ -8,12 +8,12 @@
         Title="SharpEncrypt" Height="250" Width="300">
     <Grid>
         <StackPanel Margin="10">
-            <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center">Open file</Button>
+            <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5">Open file</Button>
             <Label x:Name="labelName" Content="Selected: " HorizontalAlignment="Center" />
             <TextBox x:Name="textboxPassword" />
-            <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center">Encrypt</Button>
-            <Button Name="btnDecrypt" Click="btnDecrypt_Click" HorizontalAlignment="Center">Decrypt</Button>
-            <CheckBox x:Name="checkboxEncryptFilename" HorizontalAlignment="Center" Content="Encrypt filename" IsChecked="True" />
+            <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5">Encrypt</Button>
+            <Button Name="btnDecrypt" Click="btnDecrypt_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5,0,5,5">Decrypt</Button>
+            <CheckBox x:Name="checkboxEncryptFilename" HorizontalAlignment="Center" Content="Encrypt filename" IsChecked="True"  Padding="5,0" Margin="5" />
             <ProgressBar x:Name="progressBar" Height="25" Minimum="0" Maximum="100" />
         </StackPanel>
     </Grid>
