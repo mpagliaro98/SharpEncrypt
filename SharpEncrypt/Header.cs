@@ -20,12 +20,15 @@ namespace SharpEncrypt
 
         // Software versions
         private const byte VERSION_INDEV1 = 0x01;
-        private static readonly byte CURRENT_VERSION = VERSION_INDEV1;
+        private const byte VERSION_INDEV2 = 0x02;
+        private static readonly byte CURRENT_VERSION = VERSION_INDEV2;
 
         private byte[] checksum = new byte[AesCryptographyService.BLOCK_SIZE];
         private int filesize = 0;
         private string extension = "";
+        private byte[] extensionEncrypted = new byte[AesCryptographyService.BLOCK_SIZE];
         private string filename = "";
+        private byte[] filenameEncrypted = new byte[AesCryptographyService.BLOCK_SIZE];
         private int contentStartIdx = 0;
 
         public ushort HeaderSize
@@ -35,8 +38,8 @@ namespace SharpEncrypt
                 return (ushort)(IDENTIFIER.Length + sizeof(ushort) + sizeof(byte) +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + checksum.Length +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + sizeof(int) +
-                    DELIM.Length + sizeof(byte) + sizeof(ushort) + Encoding.UTF8.GetByteCount(extension) +
-                    DELIM.Length + sizeof(byte) + sizeof(ushort) + Encoding.UTF8.GetByteCount(filename) +
+                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? extensionEncrypted.Length : Encoding.UTF8.GetByteCount(extension)) +
+                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? filenameEncrypted.Length : Encoding.UTF8.GetByteCount(filename)) +
                     END.Length);
             }
         }
@@ -55,13 +58,11 @@ namespace SharpEncrypt
         public string FileExtension
         {
             get { return extension; }
-            set { extension = value; }
         }
 
         public string FileName
         {
             get { return filename; }
-            set { filename = value; }
         }
 
         public int ContentStartIdx
@@ -123,31 +124,31 @@ namespace SharpEncrypt
             Array.Copy(DELIM, 0, result, idx, DELIM.Length);
             idx += DELIM.Length;
             result[idx++] = CODE_EXTENSION;
-            byte[] extensionSize = BitConverter.GetBytes((ushort)Encoding.UTF8.GetByteCount(extension));
+            byte[] extensionSize = BitConverter.GetBytes((ushort)extensionEncrypted.Length);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(extensionSize);
             Array.Copy(extensionSize, 0, result, idx, sizeof(ushort));
             idx += sizeof(ushort);
-            Array.Copy(Encoding.UTF8.GetBytes(extension), 0, result, idx, Encoding.UTF8.GetByteCount(extension));
-            idx += Encoding.UTF8.GetByteCount(extension);
+            Array.Copy(extensionEncrypted, 0, result, idx, extensionEncrypted.Length);
+            idx += extensionEncrypted.Length;
 
             // Filename
             Array.Copy(DELIM, 0, result, idx, DELIM.Length);
             idx += DELIM.Length;
             result[idx++] = CODE_FILENAME;
-            byte[] filenameSize = BitConverter.GetBytes((ushort)Encoding.UTF8.GetByteCount(filename));
+            byte[] filenameSize = BitConverter.GetBytes((ushort)filenameEncrypted.Length);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(filenameSize);
             Array.Copy(filenameSize, 0, result, idx, sizeof(ushort));
             idx += sizeof(ushort);
-            Array.Copy(Encoding.UTF8.GetBytes(filename), 0, result, idx, Encoding.UTF8.GetByteCount(filename));
-            idx += Encoding.UTF8.GetByteCount(filename);
+            Array.Copy(filenameEncrypted, 0, result, idx, filenameEncrypted.Length);
+            idx += filenameEncrypted.Length;
 
             Array.Copy(END, 0, result, idx, END.Length);
             return result;
         }
 
-        public void ParseHeader(byte[] loadedFile)
+        public void ParseHeader(byte[] loadedFile, string password)
         {
             if (!Util.MatchByteSequence(loadedFile, 0, IDENTIFIER))
                 throw new Exception("This file is not recognized as an encrypted file and cannot be decrypted.");
@@ -192,10 +193,26 @@ namespace SharpEncrypt
                             filesize = BitConverter.ToInt32(filesizeBytes, 0);
                             break;
                         case CODE_EXTENSION:
-                            extension = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
+                            if (CURRENT_VERSION >= VERSION_INDEV2)
+                            {
+                                Array.Copy(loadedFile, idx, extensionEncrypted, 0, dataSize);
+                                AesCryptographyService aes = new AesCryptographyService();
+                                byte[] decrypted = aes.Decrypt(extensionEncrypted, password);
+                                extension = Encoding.UTF8.GetString(decrypted).Replace("\0", String.Empty);
+                            }
+                            else
+                                extension = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
                             break;
                         case CODE_FILENAME:
-                            filename = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
+                            if (CURRENT_VERSION >= VERSION_INDEV2)
+                            {
+                                Array.Copy(loadedFile, idx, filenameEncrypted, 0, dataSize);
+                                AesCryptographyService aes = new AesCryptographyService();
+                                byte[] decrypted = aes.Decrypt(filenameEncrypted, password);
+                                filename = Encoding.UTF8.GetString(decrypted).Replace("\0", String.Empty);
+                            }
+                            else
+                                filename = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
                             break;
                         default:
                             System.Diagnostics.Debug.WriteLine("WARNING: Unsupported header code " + headerCode.ToString());
@@ -214,6 +231,20 @@ namespace SharpEncrypt
         {
             AesCryptographyService aes = new AesCryptographyService();
             checksum = aes.Encrypt(Encoding.UTF8.GetBytes(password));
+        }
+
+        public void SetFileExtension(string extension, string password)
+        {
+            this.extension = extension;
+            AesCryptographyService aes = new AesCryptographyService();
+            extensionEncrypted = aes.Encrypt(Encoding.UTF8.GetBytes(extension), password);
+        }
+
+        public void SetFileName(string filename, string password)
+        {
+            this.filename = filename;
+            AesCryptographyService aes = new AesCryptographyService();
+            filenameEncrypted = aes.Encrypt(Encoding.UTF8.GetBytes(filename), password);
         }
 
         private bool NextBytesAreDelim(byte[] bytes, int startIdx)

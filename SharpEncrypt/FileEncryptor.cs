@@ -56,8 +56,8 @@ namespace SharpEncrypt
             header.SetPassword(password);
             header.OriginalFilesize = loadedFile.Length;
             string filename = Path.GetFileName(filepath);
-            header.FileExtension = Path.GetExtension(filename);
-            header.FileName = Path.GetFileNameWithoutExtension(filename);
+            header.SetFileExtension(Path.GetExtension(filename), password);
+            header.SetFileName(Path.GetFileNameWithoutExtension(filename), password);
 
             var aes = new AesCryptographyService();
             for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
@@ -99,7 +99,7 @@ namespace SharpEncrypt
         {
             try
             {
-                header.ParseHeader(loadedFile);
+                header.ParseHeader(loadedFile, password);
             }
             catch (Exception e)
             {
