@@ -23,7 +23,8 @@ namespace SharpEncrypt
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<FileEncryptor> fileEncryptors = new List<FileEncryptor>();
+        //private List<FileEncryptor> fileEncryptors = new List<FileEncryptor>();
+        private SharpEncryptModel model = new SharpEncryptModel();
 
         public MainWindow()
         {
@@ -38,10 +39,10 @@ namespace SharpEncrypt
             if (openFileDialog.ShowDialog() == true)
             {
                 // TODO: WORK WITH FOLDERS AND FILES
-                fileEncryptors.Clear();
+                model.ClearFiles();
                 foreach (string filename in openFileDialog.FileNames)
                 {
-                    fileEncryptors.Add(new FileEncryptor(filename));
+                    model.AddFile(filename);
                 }
                 UpdateUI();
             }
@@ -49,7 +50,7 @@ namespace SharpEncrypt
 
         private void Reset()
         {
-            fileEncryptors.Clear();
+            model.ClearFiles();
             textboxPassword.Text = "";
             progressBar.Value = progressBar.Minimum;
             UpdateUI();
@@ -57,9 +58,9 @@ namespace SharpEncrypt
 
         private void UpdateUI()
         {
-            labelName.Content = "Selected: " + string.Join(", ", fileEncryptors.Select(fe => System.IO.Path.GetFileName(fe.Filepath)));
-            btnEncrypt.IsEnabled = fileEncryptors.Count > 0;
-            btnDecrypt.IsEnabled = fileEncryptors.Count > 0;
+            labelName.Content = "Selected: " + string.Join(", ", model.Files.Select(fi => fi.FileName));
+            btnEncrypt.IsEnabled = model.NumFiles > 0;
+            btnDecrypt.IsEnabled = model.NumFiles > 0;
         }
 
         private void btnEncrypt_Click(object sender, RoutedEventArgs e)
@@ -74,40 +75,27 @@ namespace SharpEncrypt
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWorkEncrypt;
-            worker.ProgressChanged += worker_ProgressChangedEncrypt;
-            worker.RunWorkerCompleted += worker_RunWorkerCompletedEncrypt;
-            worker.RunWorkerAsync(argument: new Tuple<List<FileEncryptor>, string, bool>(fileEncryptors, password, checkboxEncryptFilename.IsChecked.Value));
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            worker.RunWorkerAsync(argument: new Tuple<string, bool>(password, checkboxEncryptFilename.IsChecked.Value));
             PrimaryWindow.IsEnabled = false;
         }
 
         private void worker_DoWorkEncrypt(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            Tuple<List<FileEncryptor>, string, bool> args = e.Argument as Tuple<List<FileEncryptor>, string, bool>;
-            List<FileEncryptor> fileEncryptors = args.Item1;
-            string password = args.Item2;
-            bool encryptFilename = args.Item3;
-
-            string output = "";
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
-            {
-                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
-                if (result)
-                    output += "Successfully encrypted.";
-                else
-                    output += "Something went wrong.";
-                output += "\n";
-            }
-            e.Result = output;
+            Tuple<string, bool> args = e.Argument as Tuple<string, bool>;
+            string password = args.Item1;
+            bool encryptFilename = args.Item2;
+            e.Result = model.EncryptAllFiles(password, encryptFilename, worker);
         }
 
-        private void worker_ProgressChangedEncrypt(object sender, ProgressChangedEventArgs e)
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             progressBar.Value = e.ProgressPercentage;
         }
 
-        private void worker_RunWorkerCompletedEncrypt(object sender, RunWorkerCompletedEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             MessageBox.Show(e.Result.ToString());
             PrimaryWindow.IsEnabled = true;
@@ -126,43 +114,17 @@ namespace SharpEncrypt
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWorkDecrypt;
-            worker.ProgressChanged += worker_ProgressChangedDecrypt;
-            worker.RunWorkerCompleted += worker_RunWorkerCompletedDecrypt;
-            worker.RunWorkerAsync(argument: new Tuple<List<FileEncryptor>, string>(fileEncryptors, password));
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            worker.RunWorkerAsync(argument: password);
             PrimaryWindow.IsEnabled = false;
         }
 
         private void worker_DoWorkDecrypt(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            Tuple<List<FileEncryptor>, string> args = e.Argument as Tuple<List<FileEncryptor>, string>;
-            List<FileEncryptor> fileEncryptors = args.Item1;
-            string password = args.Item2;
-
-            string output = "";
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
-            {
-                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.DecryptFile(password, worker);
-                if (result)
-                    output += "Successfully decrypted.";
-                else
-                    output += fileEncryptor.Message;
-                output += "\n";
-            }
-            e.Result = output;
-        }
-
-        private void worker_ProgressChangedDecrypt(object sender, ProgressChangedEventArgs e)
-        {
-            progressBar.Value = e.ProgressPercentage;
-        }
-
-        private void worker_RunWorkerCompletedDecrypt(object sender, RunWorkerCompletedEventArgs e)
-        {
-            MessageBox.Show(e.Result.ToString());
-            PrimaryWindow.IsEnabled = true;
-            Reset();
+            string password = e.Argument as string;
+            e.Result = model.DecryptAllFiles(password, worker);
         }
     }
 }

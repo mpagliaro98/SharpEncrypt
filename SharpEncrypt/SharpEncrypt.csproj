@@ -56,6 +56,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AesCryptographyService.cs" />
+    <Compile Include="FileInfo.cs" />
+    <Compile Include="SharpEncryptModel.cs" />
     <Compile Include="Util.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

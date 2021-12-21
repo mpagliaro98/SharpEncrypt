@@ -88,10 +88,13 @@ namespace SharpEncrypt
                     }
                 }
 
-                int block = i + AesCryptographyService.BLOCK_SIZE;
-                double proportion = (double)block / loadedFile.Length;
-                double progress = proportion * 100;
-                worker.ReportProgress((int)progress);
+                if (worker != null)
+                {
+                    int block = i + AesCryptographyService.BLOCK_SIZE;
+                    double proportion = (double)block / loadedFile.Length;
+                    double progress = proportion * 100;
+                    worker.ReportProgress((int)progress);
+                }
             }
 
             string directory = Path.GetDirectoryName(filepath);
@@ -150,10 +153,13 @@ namespace SharpEncrypt
                     }
                 }
 
-                int block = i + AesCryptographyService.BLOCK_SIZE;
-                double proportion = (double)(block - headerSize) / (loadedFile.Length - headerSize);
-                double progress = proportion * 100;
-                worker.ReportProgress((int)progress);
+                if (worker != null)
+                {
+                    int block = i + AesCryptographyService.BLOCK_SIZE;
+                    double proportion = (double)(block - headerSize) / (loadedFile.Length - headerSize);
+                    double progress = proportion * 100;
+                    worker.ReportProgress((int)progress);
+                }
             }
 
             string directory = Path.GetDirectoryName(filepath);
