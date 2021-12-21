@@ -57,7 +57,17 @@ namespace SharpEncrypt
 
         private void UpdateUI()
         {
-            labelName.Content = "Selected: " + string.Join(", ", model.Files.Select(fi => fi.FileName));
+            listboxFiles.ClearItems();
+            foreach (FileInfo file in model.Files)
+            {
+                TextBlock tb = new TextBlock()
+                {
+                    Text = file.FileName + " (" + string.Format("{0:0.00}", file.FileSizeMB) + "MB)",
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness() { Left = 5, Right = 5 }
+                };
+                listboxFiles.AddItem(tb);
+            }
             btnEncrypt.IsEnabled = model.NumFiles > 0;
             btnDecrypt.IsEnabled = model.NumFiles > 0;
         }

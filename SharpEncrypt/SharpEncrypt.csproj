@@ -57,6 +57,10 @@
     </ApplicationDefinition>
     <Compile Include="AesCryptographyService.cs" />
     <Compile Include="FileInfo.cs" />
+    <Compile Include="InvertBooleanConverter.cs" />
+    <Compile Include="ScalableListBox.xaml.cs">
+      <DependentUpon>ScalableListBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SharpEncryptModel.cs" />
     <Compile Include="Util.cs" />
     <Page Include="MainWindow.xaml">
@@ -73,6 +77,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ScalableListBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
