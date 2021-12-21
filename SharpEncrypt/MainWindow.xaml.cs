@@ -23,7 +23,6 @@ namespace SharpEncrypt
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private List<FileEncryptor> fileEncryptors = new List<FileEncryptor>();
         private SharpEncryptModel model = new SharpEncryptModel();
 
         public MainWindow()

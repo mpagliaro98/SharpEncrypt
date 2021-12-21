@@ -42,5 +42,27 @@ namespace SharpEncrypt
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+        public static T[] RangeSubset<T>(this T[] array, int startIndex, int length)
+        {
+            T[] subset = new T[length];
+            Array.Copy(array, startIndex, subset, 0, Math.Min(length, array.Length - startIndex));  // pad with zeroes if not enough data to fill new array
+            return subset;
+        }
+
+        public static T[] Subset<T>(this T[] array, params int[] indices)
+        {
+            T[] subset = new T[indices.Length];
+            for (int i = 0; i < indices.Length; i++)
+            {
+                subset[i] = array[indices[i]];
+            }
+            return subset;
+        }
+
+        public static void OverwriteSubset<T>(this T[] array, T[] newData, int startIndex)
+        {
+            Array.Copy(newData, 0, array, startIndex, Math.Min(newData.Length, array.Length - startIndex));
+        }
     }
 }

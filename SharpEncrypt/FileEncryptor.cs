@@ -63,38 +63,12 @@ namespace SharpEncrypt
             var aes = new AesCryptographyService();
             for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
             {
-                // Get next block
-                byte[] current = new byte[AesCryptographyService.BLOCK_SIZE];
-                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
-                {
-                    if (i + j < loadedFile.Length)
-                        current[j] = loadedFile[i + j];
-                    else
-                        current[j] = 0;  // pad final block with zeroes
-                }
-
-                // Encrypt the block
+                byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
                 byte[] encrypted = aes.Encrypt(current, password);
-
-                // Write the encrypted block to the result
-                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
-                {
-                    if (i + j < result.Length)
-                        result[i + j] = encrypted[j];
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.BLOCK_SIZE.ToString() + " bytes.");
-                        break;
-                    }
-                }
+                result.OverwriteSubset(encrypted, i);
 
                 if (worker != null)
-                {
-                    int block = i + AesCryptographyService.BLOCK_SIZE;
-                    double proportion = (double)block / loadedFile.Length;
-                    double progress = proportion * 100;
-                    worker.ReportProgress((int)progress);
-                }
+                    worker.ReportProgress((int)((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100));
             }
 
             string directory = Path.GetDirectoryName(filepath);
@@ -128,38 +102,12 @@ namespace SharpEncrypt
             var aes = new AesCryptographyService();
             for (int i = headerSize; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
             {
-                // Get the next block
-                byte[] current = new byte[AesCryptographyService.BLOCK_SIZE];
-                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
-                {
-                    if (i + j < loadedFile.Length)
-                        current[j] = loadedFile[i + j];
-                    else
-                        current[j] = 0;
-                }
-
-                // Decrypt the block
+                byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
                 byte[] decrypted = aes.Decrypt(current, password);
-
-                // Write the decrypted block to the result
-                for (int j = 0; j < AesCryptographyService.BLOCK_SIZE; ++j)
-                {
-                    if (i + j - headerSize < result.Length)
-                        result[i + j - headerSize] = decrypted[j];
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("WARNING: Final block is not " + AesCryptographyService.BLOCK_SIZE.ToString() + " bytes.");
-                        break;
-                    }
-                }
+                result.OverwriteSubset(decrypted, i - headerSize);
 
                 if (worker != null)
-                {
-                    int block = i + AesCryptographyService.BLOCK_SIZE;
-                    double proportion = (double)(block - headerSize) / (loadedFile.Length - headerSize);
-                    double progress = proportion * 100;
-                    worker.ReportProgress((int)progress);
-                }
+                    worker.ReportProgress((int)((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100));
             }
 
             string directory = Path.GetDirectoryName(filepath);
