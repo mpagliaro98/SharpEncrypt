@@ -23,9 +23,7 @@ namespace SharpEncrypt
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private byte[] loadedFile;
-        //private string filename = "";
-        private FileEncryptor fileEncryptor = new FileEncryptor();
+        private List<FileEncryptor> fileEncryptors = new List<FileEncryptor>();
 
         public MainWindow()
         {
@@ -36,17 +34,22 @@ namespace SharpEncrypt
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
                 // TODO: WORK WITH FOLDERS AND FILES
-                fileEncryptor = new FileEncryptor(openFileDialog.FileName);
+                fileEncryptors.Clear();
+                foreach (string filename in openFileDialog.FileNames)
+                {
+                    fileEncryptors.Add(new FileEncryptor(filename));
+                }
                 UpdateUI();
             }
         }
 
         private void Reset()
         {
-            fileEncryptor = new FileEncryptor();
+            fileEncryptors.Clear();
             textboxPassword.Text = "";
             progressBar.Value = progressBar.Minimum;
             UpdateUI();
@@ -54,9 +57,9 @@ namespace SharpEncrypt
 
         private void UpdateUI()
         {
-            labelName.Content = "Selected: " + fileEncryptor.Filepath;
-            btnEncrypt.IsEnabled = fileEncryptor.Filepath.Length > 0;
-            btnDecrypt.IsEnabled = fileEncryptor.Filepath.Length > 0;
+            labelName.Content = "Selected: " + string.Join(", ", fileEncryptors.Select(fe => System.IO.Path.GetFileName(fe.Filepath)));
+            btnEncrypt.IsEnabled = fileEncryptors.Count > 0;
+            btnDecrypt.IsEnabled = fileEncryptors.Count > 0;
         }
 
         private void btnEncrypt_Click(object sender, RoutedEventArgs e)
@@ -68,14 +71,19 @@ namespace SharpEncrypt
                 return;
             }
 
-            var result = fileEncryptor.EncryptFile(password, checkboxEncryptFilename.IsChecked.Value);
-            if (!result)
+            string output = "";
+            foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                MessageBox.Show("Something went wrong.");
-                return;
+                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
+                var result = fileEncryptor.EncryptFile(password, checkboxEncryptFilename.IsChecked.Value);
+                if (result)
+                    output += "Successfully encrypted.";
+                else
+                    output += "Something went wrong.";
+                output += "\n";
             }
+            MessageBox.Show(output);
 
-            MessageBox.Show("File successfully encrypted.");
             Reset();
         }
 
@@ -88,14 +96,19 @@ namespace SharpEncrypt
                 return;
             }
 
-            var result = fileEncryptor.DecryptFile(password);
-            if (!result)
+            string output = "";
+            foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                MessageBox.Show(fileEncryptor.Message);
-                return;
+                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
+                var result = fileEncryptor.DecryptFile(password);
+                if (result)
+                    output += "Successfully decrypted.";
+                else
+                    output += fileEncryptor.Message;
+                output += "\n";
             }
+            MessageBox.Show(output);
 
-            MessageBox.Show("File successfully decrypted.");
             Reset();
         }
     }

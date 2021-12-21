@@ -103,7 +103,7 @@ namespace SharpEncrypt
             }
             catch (Exception e)
             {
-                message = "Something went wrong when reading the file:\n" + e.Message;
+                message = e.Message;
                 return false;
             }
             
