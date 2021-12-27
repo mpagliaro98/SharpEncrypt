@@ -97,8 +97,8 @@ namespace SharpEncrypt
             string password = args.Item1;
             bool encryptFilename = args.Item2;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
-            WorkTracker tracker = new WorkTracker(worker);
-            model.EncryptAllFiles(password, encryptFilename, tracker, buffer);
+            WorkTracker tracker = new WorkTracker(worker, buffer);
+            model.EncryptAllFiles(password, encryptFilename, tracker);
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -136,8 +136,8 @@ namespace SharpEncrypt
             BackgroundWorkerTracker worker = sender as BackgroundWorkerTracker;
             string password = e.Argument as string;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
-            WorkTracker tracker = new WorkTracker(worker);
-            model.DecryptAllFiles(password, tracker, buffer);
+            WorkTracker tracker = new WorkTracker(worker, buffer);
+            model.DecryptAllFiles(password, tracker);
         }
     }
 }

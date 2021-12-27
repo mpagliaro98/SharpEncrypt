@@ -41,12 +41,12 @@ namespace SharpEncrypt
             fileEncryptors.Add(new FileEncryptor(filepath));
         }
 
-        public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null, OutputBuffer buffer = null)
+        public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                if (buffer != null)
-                    buffer.AppendText("Encrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText("Encrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 bool result = fileEncryptor.EncryptFile(password, encryptFilename, tracker);
@@ -55,25 +55,25 @@ namespace SharpEncrypt
                 string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
                 if (result)
                 {
-                    if (buffer != null)
-                        buffer.AppendText("Success. (" + timeElapsed + ")");
+                    if (tracker != null)
+                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ")");
                 }
                 else
                 {
-                    if (buffer != null)
-                        buffer.AppendText("Something went wrong.");
+                    if (tracker != null)
+                        tracker.OutputBuffer.AppendText("Something went wrong.");
                 }
-                if (buffer != null)
-                    buffer.AppendText("\n");
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText("\n");
             }
         }
 
-        public void DecryptAllFiles(string password, WorkTracker tracker = null, OutputBuffer buffer = null)
+        public void DecryptAllFiles(string password, WorkTracker tracker = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                if (buffer != null)
-                    buffer.AppendText("Decrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText("Decrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 bool result = fileEncryptor.DecryptFile(password, tracker);
@@ -82,16 +82,16 @@ namespace SharpEncrypt
                 string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
                 if (result)
                 {
-                    if (buffer != null)
-                        buffer.AppendText("Success. (" + timeElapsed + ")");
+                    if (tracker != null)
+                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ")");
                 }
                 else
                 {
-                    if (buffer != null)
-                        buffer.AppendText(fileEncryptor.Message);
+                    if (tracker != null)
+                        tracker.OutputBuffer.AppendText(fileEncryptor.Message);
                 }
-                if (buffer != null)
-                    buffer.AppendText("\n");
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText("\n");
             }
         }
     }

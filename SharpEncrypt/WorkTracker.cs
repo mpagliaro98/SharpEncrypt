@@ -9,10 +9,17 @@ namespace SharpEncrypt
     public class WorkTracker
     {
         private readonly IWorkTracker tracker;
+        private readonly OutputBuffer buffer;
 
-        public WorkTracker(IWorkTracker tracker)
+        public OutputBuffer OutputBuffer
+        {
+            get { return buffer; }
+        }
+
+        public WorkTracker(IWorkTracker tracker, OutputBuffer buffer)
         {
             this.tracker = tracker;
+            this.buffer = buffer;
         }
 
         public void ReportProgress(double progress)
