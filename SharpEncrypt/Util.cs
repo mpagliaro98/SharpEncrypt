@@ -11,6 +11,8 @@ namespace SharpEncrypt
     {
         private static Random random = new Random();
 
+        public static Encoding StringEncoding { get { return Encoding.UTF8; } }
+
         public static byte[] ConcatByteArrays(byte[] first, byte[] second)
         {
             byte[] ret = new byte[first.Length + second.Length];
@@ -23,7 +25,7 @@ namespace SharpEncrypt
         {
             using (MD5 md5 = MD5.Create())
             {
-                return md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return md5.ComputeHash(StringEncoding.GetBytes(input));
             }
         }
 

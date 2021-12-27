@@ -38,8 +38,8 @@ namespace SharpEncrypt
                 return (ushort)(IDENTIFIER.Length + sizeof(ushort) + sizeof(byte) +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + checksum.Length +
                     DELIM.Length + sizeof(byte) + sizeof(ushort) + sizeof(int) +
-                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? extensionEncrypted.Length : Encoding.UTF8.GetByteCount(extension)) +
-                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? filenameEncrypted.Length : Encoding.UTF8.GetByteCount(filename)) +
+                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? extensionEncrypted.Length : Util.StringEncoding.GetByteCount(extension)) +
+                    DELIM.Length + sizeof(byte) + sizeof(ushort) + (CURRENT_VERSION >= VERSION_INDEV2 ? filenameEncrypted.Length : Util.StringEncoding.GetByteCount(filename)) +
                     END.Length);
             }
         }
@@ -198,10 +198,10 @@ namespace SharpEncrypt
                                 Array.Copy(loadedFile, idx, extensionEncrypted, 0, dataSize);
                                 AesCryptographyService aes = new AesCryptographyService();
                                 byte[] decrypted = aes.Decrypt(extensionEncrypted, password);
-                                extension = Encoding.UTF8.GetString(decrypted).Replace("\0", String.Empty);
+                                extension = Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
                             }
                             else
-                                extension = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
+                                extension = Util.StringEncoding.GetString(loadedFile, idx, dataSize);
                             break;
                         case CODE_FILENAME:
                             if (CURRENT_VERSION >= VERSION_INDEV2)
@@ -209,10 +209,10 @@ namespace SharpEncrypt
                                 Array.Copy(loadedFile, idx, filenameEncrypted, 0, dataSize);
                                 AesCryptographyService aes = new AesCryptographyService();
                                 byte[] decrypted = aes.Decrypt(filenameEncrypted, password);
-                                filename = Encoding.UTF8.GetString(decrypted).Replace("\0", String.Empty);
+                                filename = Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
                             }
                             else
-                                filename = Encoding.UTF8.GetString(loadedFile, idx, dataSize);
+                                filename = Util.StringEncoding.GetString(loadedFile, idx, dataSize);
                             break;
                         default:
                             System.Diagnostics.Debug.WriteLine("WARNING: Unsupported header code " + headerCode.ToString());
@@ -230,21 +230,21 @@ namespace SharpEncrypt
         public void SetPassword(string password)
         {
             AesCryptographyService aes = new AesCryptographyService();
-            checksum = aes.Encrypt(Encoding.UTF8.GetBytes(password));
+            checksum = aes.Encrypt(Util.StringEncoding.GetBytes(password));
         }
 
         public void SetFileExtension(string extension, string password)
         {
             this.extension = extension;
             AesCryptographyService aes = new AesCryptographyService();
-            extensionEncrypted = aes.Encrypt(Encoding.UTF8.GetBytes(extension), password);
+            extensionEncrypted = aes.Encrypt(Util.StringEncoding.GetBytes(extension), password);
         }
 
         public void SetFileName(string filename, string password)
         {
             this.filename = filename;
             AesCryptographyService aes = new AesCryptographyService();
-            filenameEncrypted = aes.Encrypt(Encoding.UTF8.GetBytes(filename), password);
+            filenameEncrypted = aes.Encrypt(Util.StringEncoding.GetBytes(filename), password);
         }
 
         private bool NextBytesAreDelim(byte[] bytes, int startIdx)

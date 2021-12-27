@@ -44,7 +44,7 @@ namespace SharpEncrypt
         private bool ValidateChecksum(string password)
         {
             AesCryptographyService aes = new AesCryptographyService();
-            byte[] encrypted = aes.Encrypt(Encoding.UTF8.GetBytes(password));
+            byte[] encrypted = aes.Encrypt(Util.StringEncoding.GetBytes(password));
             return encrypted.SequenceEqual(header.Checksum);
         }
 
