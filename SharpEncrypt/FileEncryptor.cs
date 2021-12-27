@@ -73,7 +73,7 @@ namespace SharpEncrypt
 
             string directory = Path.GetDirectoryName(filepath);
             string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
-            File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(header.GetHeader(), result));
+            File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(header.BuildHeader(), result));
             File.Delete(filepath);
             return true;
         }

@@ -70,7 +70,7 @@ namespace SharpEncrypt
             get { return contentStartIdx; }
         }
 
-        public byte[] GetHeader()
+        public byte[] BuildHeader()
         {
             // 4 bytes - identifier
             // 2 bytes - size of entire header
@@ -84,67 +84,36 @@ namespace SharpEncrypt
 
             int idx = 0;
             byte[] result = new byte[HeaderSize];
-            Array.Copy(IDENTIFIER, 0, result, 0, IDENTIFIER.Length);
-            idx += IDENTIFIER.Length;
-            byte[] headerSize = BitConverter.GetBytes(HeaderSize);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(headerSize);
-            Array.Copy(headerSize, 0, result, idx, sizeof(ushort));
-            idx += sizeof(ushort);
+
+            LoadIntoByteArray(result, ref idx, IDENTIFIER);
+            LoadIntoByteArray(result, ref idx, HeaderSize);
             result[idx++] = CURRENT_VERSION;
 
             // Checksum
-            Array.Copy(DELIM, 0, result, idx, DELIM.Length);
-            idx += DELIM.Length;
+            LoadIntoByteArray(result, ref idx, DELIM);
             result[idx++] = CODE_CHECKSUM;
-            byte[] checksumSize = BitConverter.GetBytes((ushort)checksum.Length);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(checksumSize);
-            Array.Copy(checksumSize, 0, result, idx, sizeof(ushort));
-            idx += sizeof(ushort);
-            Array.Copy(checksum, 0, result, idx, checksum.Length);
-            idx += checksum.Length;
+            LoadIntoByteArray(result, ref idx, (ushort)checksum.Length);
+            LoadIntoByteArray(result, ref idx, checksum);
 
             // Filesize
-            Array.Copy(DELIM, 0, result, idx, DELIM.Length);
-            idx += DELIM.Length;
+            LoadIntoByteArray(result, ref idx, DELIM);
             result[idx++] = CODE_FILESIZE;
-            byte[] filesizeSize = BitConverter.GetBytes((ushort)sizeof(int));
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(filesizeSize);
-            Array.Copy(filesizeSize, 0, result, idx, sizeof(ushort));
-            idx += sizeof(ushort);
-            byte[] filesizeBytes = BitConverter.GetBytes(filesize);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(filesizeBytes);
-            Array.Copy(filesizeBytes, 0, result, idx, sizeof(int));
-            idx += sizeof(int);
+            LoadIntoByteArray(result, ref idx, (ushort)sizeof(int));
+            LoadIntoByteArray(result, ref idx, filesize);
 
             // Extension
-            Array.Copy(DELIM, 0, result, idx, DELIM.Length);
-            idx += DELIM.Length;
+            LoadIntoByteArray(result, ref idx, DELIM);
             result[idx++] = CODE_EXTENSION;
-            byte[] extensionSize = BitConverter.GetBytes((ushort)extensionEncrypted.Length);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(extensionSize);
-            Array.Copy(extensionSize, 0, result, idx, sizeof(ushort));
-            idx += sizeof(ushort);
-            Array.Copy(extensionEncrypted, 0, result, idx, extensionEncrypted.Length);
-            idx += extensionEncrypted.Length;
+            LoadIntoByteArray(result, ref idx, (ushort)extensionEncrypted.Length);
+            LoadIntoByteArray(result, ref idx, extensionEncrypted);
 
             // Filename
-            Array.Copy(DELIM, 0, result, idx, DELIM.Length);
-            idx += DELIM.Length;
+            LoadIntoByteArray(result, ref idx, DELIM);
             result[idx++] = CODE_FILENAME;
-            byte[] filenameSize = BitConverter.GetBytes((ushort)filenameEncrypted.Length);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(filenameSize);
-            Array.Copy(filenameSize, 0, result, idx, sizeof(ushort));
-            idx += sizeof(ushort);
-            Array.Copy(filenameEncrypted, 0, result, idx, filenameEncrypted.Length);
-            idx += filenameEncrypted.Length;
+            LoadIntoByteArray(result, ref idx, (ushort)filenameEncrypted.Length);
+            LoadIntoByteArray(result, ref idx, filenameEncrypted);
 
-            Array.Copy(END, 0, result, idx, END.Length);
+            LoadIntoByteArray(result, ref idx, END);
             return result;
         }
 
@@ -154,12 +123,7 @@ namespace SharpEncrypt
                 throw new Exception("This file is not recognized as an encrypted file and cannot be decrypted.");
 
             int idx = IDENTIFIER.Length;
-            byte[] contentStartIdxBytes = new byte[sizeof(ushort)];
-            Array.Copy(loadedFile, 0, contentStartIdxBytes, 0, sizeof(ushort));
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(contentStartIdxBytes);
-            contentStartIdx = BitConverter.ToUInt16(contentStartIdxBytes, 0);
-            idx += sizeof(ushort);
+            contentStartIdx = ReadUInt16FromByteArray(loadedFile, ref idx);
             byte version = loadedFile[idx++];
             if (version > CURRENT_VERSION)
                 throw new Exception("This file cannot be opened with this version of SharpEncrypt. Please use a later version.");
@@ -174,51 +138,38 @@ namespace SharpEncrypt
                 {
                     idx += DELIM.Length;
                     byte headerCode = loadedFile[idx++];
-                    byte[] dataSizeBytes = new byte[sizeof(ushort)];
-                    Array.Copy(loadedFile, idx, dataSizeBytes, 0, sizeof(ushort));
-                    if (BitConverter.IsLittleEndian)
-                        Array.Reverse(dataSizeBytes);
-                    ushort dataSize = BitConverter.ToUInt16(dataSizeBytes, 0);
-                    idx += sizeof(ushort);
+                    ushort dataSize = ReadUInt16FromByteArray(loadedFile, ref idx);
                     switch (headerCode)
                     {
                         case CODE_CHECKSUM:
-                            Array.Copy(loadedFile, idx, checksum, 0, dataSize);
+                            ReadBytesFromByteArray(loadedFile, ref idx, checksum, dataSize);
                             break;
                         case CODE_FILESIZE:
-                            byte[] filesizeBytes = new byte[sizeof(int)];
-                            Array.Copy(loadedFile, idx, filesizeBytes, 0, sizeof(int));
-                            if (BitConverter.IsLittleEndian)
-                                Array.Reverse(filesizeBytes);
-                            filesize = BitConverter.ToInt32(filesizeBytes, 0);
+                            filesize = ReadInt32FromByteArray(loadedFile, ref idx);
                             break;
                         case CODE_EXTENSION:
                             if (CURRENT_VERSION >= VERSION_INDEV2)
                             {
-                                Array.Copy(loadedFile, idx, extensionEncrypted, 0, dataSize);
-                                AesCryptographyService aes = new AesCryptographyService();
-                                byte[] decrypted = aes.Decrypt(extensionEncrypted, password);
-                                extension = Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
+                                ReadBytesFromByteArray(loadedFile, ref idx, extensionEncrypted, dataSize);
+                                extension = DecryptHeaderBytes(extensionEncrypted, password);
                             }
                             else
-                                extension = Util.StringEncoding.GetString(loadedFile, idx, dataSize);
+                                extension = ReadStringFromByteArray(loadedFile, ref idx, dataSize);
                             break;
                         case CODE_FILENAME:
                             if (CURRENT_VERSION >= VERSION_INDEV2)
                             {
-                                Array.Copy(loadedFile, idx, filenameEncrypted, 0, dataSize);
-                                AesCryptographyService aes = new AesCryptographyService();
-                                byte[] decrypted = aes.Decrypt(filenameEncrypted, password);
-                                filename = Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
+                                ReadBytesFromByteArray(loadedFile, ref idx, filenameEncrypted, dataSize);
+                                filename = DecryptHeaderBytes(filenameEncrypted, password);
                             }
                             else
-                                filename = Util.StringEncoding.GetString(loadedFile, idx, dataSize);
+                                filename = ReadStringFromByteArray(loadedFile, ref idx, dataSize);
                             break;
                         default:
                             System.Diagnostics.Debug.WriteLine("WARNING: Unsupported header code " + headerCode.ToString());
+                            idx += dataSize;
                             break;
                     }
-                    idx += dataSize;
                 }
                 else
                 {
@@ -255,6 +206,77 @@ namespace SharpEncrypt
         private bool NextBytesAreEnd(byte[] bytes, int startIdx)
         {
             return Util.MatchByteSequence(bytes, startIdx, END);
+        }
+
+        private string DecryptHeaderBytes(byte[] source, string password)
+        {
+            AesCryptographyService aes = new AesCryptographyService();
+            byte[] decrypted = aes.Decrypt(source, password);
+            return Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
+        }
+
+        private void LoadIntoByteArray(byte[] dest, ref int idx, byte[] source)
+        {
+            LoadIntoByteArray(dest, ref idx, source, 0, source.Length);
+        }
+
+        private void LoadIntoByteArray(byte[] dest, ref int idx, byte[] source, int sourceStart, int len)
+        {
+            Array.Copy(source, sourceStart, dest, idx, len);
+            idx += len;
+        }
+
+        private void LoadIntoByteArray(byte[] dest, ref int idx, ushort data)
+        {
+            byte[] dataBytes = BitConverter.GetBytes(data);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(dataBytes);
+            Array.Copy(dataBytes, 0, dest, idx, sizeof(ushort));
+            idx += sizeof(ushort);
+        }
+
+        private void LoadIntoByteArray(byte[] dest, ref int idx, int data)
+        {
+            byte[] dataBytes = BitConverter.GetBytes(data);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(dataBytes);
+            Array.Copy(dataBytes, 0, dest, idx, sizeof(int));
+            idx += sizeof(int);
+        }
+
+        private ushort ReadUInt16FromByteArray(byte[] source, ref int idx)
+        {
+            byte[] dataBytes = new byte[sizeof(ushort)];
+            Array.Copy(source, idx, dataBytes, 0, sizeof(ushort));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(dataBytes);
+            ushort data = BitConverter.ToUInt16(dataBytes, 0);
+            idx += sizeof(ushort);
+            return data;
+        }
+
+        private int ReadInt32FromByteArray(byte[] source, ref int idx)
+        {
+            byte[] dataBytes = new byte[sizeof(int)];
+            Array.Copy(source, idx, dataBytes, 0, sizeof(int));
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(dataBytes);
+            int data = BitConverter.ToInt32(dataBytes, 0);
+            idx += sizeof(int);
+            return data;
+        }
+
+        private string ReadStringFromByteArray(byte[] source, ref int idx, int len)
+        {
+            string str = Util.StringEncoding.GetString(source, idx, len);
+            idx += len;
+            return str;
+        }
+
+        private void ReadBytesFromByteArray(byte[] source, ref int idx, byte[] dest, int len)
+        {
+            Array.Copy(source, idx, dest, 0, len);
+            idx += len;
         }
     }
 }
