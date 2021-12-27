@@ -26,5 +26,15 @@ namespace SharpEncrypt
         {
             Dispatcher.Invoke(callback);
         }
+
+        public void AppendText(string text)
+        {
+            Text += text;
+        }
+
+        public void ClearText()
+        {
+            Text = "";
+        }
     }
 }

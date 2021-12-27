@@ -46,7 +46,7 @@ namespace SharpEncrypt
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
                 if (buffer != null)
-                    buffer.AppendText("Encrypt " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                    buffer.AppendText("Encrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 bool result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
@@ -73,7 +73,7 @@ namespace SharpEncrypt
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
                 if (buffer != null)
-                    buffer.AppendText("Decrypt " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                    buffer.AppendText("Decrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 bool result = fileEncryptor.DecryptFile(password, worker);

@@ -9,5 +9,7 @@ namespace SharpEncrypt
     public interface IBufferable
     {
         void InvokeOutputThread(Action callback);
+        void AppendText(string text);
+        void ClearText();
     }
 }

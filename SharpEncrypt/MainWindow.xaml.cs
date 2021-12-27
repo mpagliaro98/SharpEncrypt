@@ -96,7 +96,7 @@ namespace SharpEncrypt
             Tuple<string, bool> args = e.Argument as Tuple<string, bool>;
             string password = args.Item1;
             bool encryptFilename = args.Item2;
-            OutputBuffer buffer = new OutputBuffer(textblockOutput, (tb, text) => (tb as TextBlockBufferable).Text += text);
+            OutputBuffer buffer = new OutputBuffer(textblockOutput);
             model.EncryptAllFiles(password, encryptFilename, worker, buffer);
         }
 
@@ -134,7 +134,7 @@ namespace SharpEncrypt
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             string password = e.Argument as string;
-            OutputBuffer buffer = new OutputBuffer(textblockOutput, (tb, text) => (tb as TextBlockBufferable).Text += text);
+            OutputBuffer buffer = new OutputBuffer(textblockOutput);
             model.DecryptAllFiles(password, worker, buffer);
         }
     }

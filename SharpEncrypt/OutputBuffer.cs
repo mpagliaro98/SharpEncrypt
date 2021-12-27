@@ -11,17 +11,20 @@ namespace SharpEncrypt
     public class OutputBuffer
     {
         private IBufferable outputObject;
-        private Action<IBufferable, string> updateObject;
 
-        public OutputBuffer(IBufferable outputObject, Action<IBufferable, string> updateObject)
+        public OutputBuffer(IBufferable outputObject)
         {
             this.outputObject = outputObject;
-            this.updateObject = updateObject;
         }
 
         public void AppendText(string text)
         {
-            outputObject.InvokeOutputThread(new Action(() => updateObject(outputObject, text)));
+            outputObject.InvokeOutputThread(new Action(() => outputObject.AppendText(text)));
+        }
+
+        public void ClearText()
+        {
+            outputObject.InvokeOutputThread(new Action(() => outputObject.ClearText()));
         }
     }
 }
