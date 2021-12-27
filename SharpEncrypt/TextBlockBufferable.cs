@@ -27,12 +27,12 @@ namespace SharpEncrypt
             Dispatcher.Invoke(callback);
         }
 
-        public void AppendText(string text)
+        public virtual void AppendText(string text)
         {
             Text += text;
         }
 
-        public void ClearText()
+        public virtual void ClearText()
         {
             Text = "";
         }
