@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SharpEncrypt
 {
@@ -39,36 +41,58 @@ namespace SharpEncrypt
             fileEncryptors.Add(new FileEncryptor(filepath));
         }
 
-        public string EncryptAllFiles(string password, bool encryptFilename, BackgroundWorker worker = null)
+        public void EncryptAllFiles(string password, bool encryptFilename, BackgroundWorker worker = null, OutputBuffer buffer = null)
         {
-            string output = "";
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
+                if (buffer != null)
+                    buffer.AppendText("Encrypt " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                bool result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
+                sw.Stop();
+                TimeSpan ts = sw.Elapsed;
+                string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
                 if (result)
-                    output += "Successfully encrypted.";
+                {
+                    if (buffer != null)
+                        buffer.AppendText("Success. (" + timeElapsed + ")");
+                }
                 else
-                    output += "Something went wrong.";
-                output += "\n";
+                {
+                    if (buffer != null)
+                        buffer.AppendText("Something went wrong.");
+                }
+                if (buffer != null)
+                    buffer.AppendText("\n");
             }
-            return output;
         }
 
-        public string DecryptAllFiles(string password, BackgroundWorker worker = null)
+        public void DecryptAllFiles(string password, BackgroundWorker worker = null, OutputBuffer buffer = null)
         {
-            string output = "";
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
-                output += System.IO.Path.GetFileName(fileEncryptor.Filepath) + ": ";
-                var result = fileEncryptor.DecryptFile(password, worker);
+                if (buffer != null)
+                    buffer.AppendText("Decrypt " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                bool result = fileEncryptor.DecryptFile(password, worker);
+                sw.Stop();
+                TimeSpan ts = sw.Elapsed;
+                string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
                 if (result)
-                    output += "Successfully decrypted.";
+                {
+                    if (buffer != null)
+                        buffer.AppendText("Success. (" + timeElapsed + ")");
+                }
                 else
-                    output += fileEncryptor.Message;
-                output += "\n";
+                {
+                    if (buffer != null)
+                        buffer.AppendText(fileEncryptor.Message);
+                }
+                if (buffer != null)
+                    buffer.AppendText("\n");
             }
-            return output;
         }
     }
 }

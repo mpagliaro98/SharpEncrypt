@@ -96,7 +96,8 @@ namespace SharpEncrypt
             Tuple<string, bool> args = e.Argument as Tuple<string, bool>;
             string password = args.Item1;
             bool encryptFilename = args.Item2;
-            e.Result = model.EncryptAllFiles(password, encryptFilename, worker);
+            OutputBuffer buffer = new OutputBuffer(textblockOutput, (tb, text) => (tb as TextBlockBufferable).Text += text);
+            model.EncryptAllFiles(password, encryptFilename, worker, buffer);
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -106,7 +107,7 @@ namespace SharpEncrypt
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show(e.Result.ToString());
+            MessageBox.Show("Task complete.");
             PrimaryWindow.IsEnabled = true;
             Reset();
         }
@@ -133,7 +134,8 @@ namespace SharpEncrypt
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             string password = e.Argument as string;
-            e.Result = model.DecryptAllFiles(password, worker);
+            OutputBuffer buffer = new OutputBuffer(textblockOutput, (tb, text) => (tb as TextBlockBufferable).Text += text);
+            model.DecryptAllFiles(password, worker, buffer);
         }
     }
 }

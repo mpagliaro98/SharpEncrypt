@@ -28,6 +28,7 @@
                 <TextBox x:Name="textboxPassword" VerticalAlignment="Center" Margin="5" />
             </DockPanel>
             <local:ScalableListBox x:Name="listboxFiles" Grid.Row="2" Margin="5" />
+            <local:TextBlockBufferable x:Name="textblockOutput" Grid.Row="3" Margin="5" Padding="5" Background="#FFDEDEDE" TextWrapping="Wrap" />
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
