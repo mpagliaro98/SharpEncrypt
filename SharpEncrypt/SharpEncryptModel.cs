@@ -41,7 +41,7 @@ namespace SharpEncrypt
             fileEncryptors.Add(new FileEncryptor(filepath));
         }
 
-        public void EncryptAllFiles(string password, bool encryptFilename, BackgroundWorker worker = null, OutputBuffer buffer = null)
+        public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null, OutputBuffer buffer = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
@@ -49,7 +49,7 @@ namespace SharpEncrypt
                     buffer.AppendText("Encrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                bool result = fileEncryptor.EncryptFile(password, encryptFilename, worker);
+                bool result = fileEncryptor.EncryptFile(password, encryptFilename, tracker);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
                 string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
@@ -68,7 +68,7 @@ namespace SharpEncrypt
             }
         }
 
-        public void DecryptAllFiles(string password, BackgroundWorker worker = null, OutputBuffer buffer = null)
+        public void DecryptAllFiles(string password, WorkTracker tracker = null, OutputBuffer buffer = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
             {
@@ -76,7 +76,7 @@ namespace SharpEncrypt
                     buffer.AppendText("Decrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                bool result = fileEncryptor.DecryptFile(password, worker);
+                bool result = fileEncryptor.DecryptFile(password, tracker);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
                 string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));

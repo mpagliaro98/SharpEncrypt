@@ -48,7 +48,7 @@ namespace SharpEncrypt
             return encrypted.SequenceEqual(header.Checksum);
         }
 
-        public bool EncryptFile(string password, bool encryptFilename, BackgroundWorker worker)
+        public bool EncryptFile(string password, bool encryptFilename, WorkTracker tracker)
         {
             // Make sure encrypted result is a size divisible by the block size
             byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
@@ -67,8 +67,8 @@ namespace SharpEncrypt
                 byte[] encrypted = aes.Encrypt(current, password);
                 result.OverwriteSubset(encrypted, i);
 
-                if (worker != null)
-                    worker.ReportProgress((int)((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100));
+                if (tracker != null)
+                    tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100);
             }
 
             string directory = Path.GetDirectoryName(filepath);
@@ -78,7 +78,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public bool DecryptFile(string password, BackgroundWorker worker)
+        public bool DecryptFile(string password, WorkTracker tracker)
         {
             try
             {
@@ -106,8 +106,8 @@ namespace SharpEncrypt
                 byte[] decrypted = aes.Decrypt(current, password);
                 result.OverwriteSubset(decrypted, i - headerSize);
 
-                if (worker != null)
-                    worker.ReportProgress((int)((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100));
+                if (tracker != null)
+                    tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100);
             }
 
             string directory = Path.GetDirectoryName(filepath);

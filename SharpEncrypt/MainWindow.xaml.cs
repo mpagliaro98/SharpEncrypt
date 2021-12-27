@@ -81,7 +81,7 @@ namespace SharpEncrypt
                 return;
             }
 
-            BackgroundWorker worker = new BackgroundWorker();
+            BackgroundWorkerTracker worker = new BackgroundWorkerTracker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWorkEncrypt;
             worker.ProgressChanged += worker_ProgressChanged;
@@ -92,12 +92,13 @@ namespace SharpEncrypt
 
         private void worker_DoWorkEncrypt(object sender, DoWorkEventArgs e)
         {
-            BackgroundWorker worker = sender as BackgroundWorker;
+            BackgroundWorkerTracker worker = sender as BackgroundWorkerTracker;
             Tuple<string, bool> args = e.Argument as Tuple<string, bool>;
             string password = args.Item1;
             bool encryptFilename = args.Item2;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
-            model.EncryptAllFiles(password, encryptFilename, worker, buffer);
+            WorkTracker tracker = new WorkTracker(worker);
+            model.EncryptAllFiles(password, encryptFilename, tracker, buffer);
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -121,7 +122,7 @@ namespace SharpEncrypt
                 return;
             }
 
-            BackgroundWorker worker = new BackgroundWorker();
+            BackgroundWorkerTracker worker = new BackgroundWorkerTracker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWorkDecrypt;
             worker.ProgressChanged += worker_ProgressChanged;
@@ -132,10 +133,11 @@ namespace SharpEncrypt
 
         private void worker_DoWorkDecrypt(object sender, DoWorkEventArgs e)
         {
-            BackgroundWorker worker = sender as BackgroundWorker;
+            BackgroundWorkerTracker worker = sender as BackgroundWorkerTracker;
             string password = e.Argument as string;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
-            model.DecryptAllFiles(password, worker, buffer);
+            WorkTracker tracker = new WorkTracker(worker);
+            model.DecryptAllFiles(password, tracker, buffer);
         }
     }
 }

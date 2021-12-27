@@ -56,9 +56,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AesCryptographyService.cs" />
+    <Compile Include="BackgroundWorkerTracker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FileInfo.cs" />
     <Compile Include="IBufferable.cs" />
     <Compile Include="InvertBooleanConverter.cs" />
+    <Compile Include="IWorkTracker.cs" />
     <Compile Include="OutputBuffer.cs" />
     <Compile Include="ScalableListBox.xaml.cs">
       <DependentUpon>ScalableListBox.xaml</DependentUpon>
@@ -66,6 +70,7 @@
     <Compile Include="SharpEncryptModel.cs" />
     <Compile Include="TextBlockBufferable.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="WorkTracker.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
