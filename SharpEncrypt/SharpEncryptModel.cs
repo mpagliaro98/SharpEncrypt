@@ -67,16 +67,16 @@ namespace SharpEncrypt
                 bool result = fileEncryptor.EncryptFile(password, encryptFilename, tracker);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
-                string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
+                string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
                 if (result)
                 {
                     if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ")");
+                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ") --- " + fileEncryptor.Message);
                 }
                 else
                 {
                     if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Something went wrong.");
+                        tracker.OutputBuffer.AppendText(fileEncryptor.Message);
                 }
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText("\n");
@@ -94,11 +94,11 @@ namespace SharpEncrypt
                 bool result = fileEncryptor.DecryptFile(password, tracker);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
-                string timeElapsed = string.Format("{0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
+                string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
                 if (result)
                 {
                     if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ")");
+                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ") --- " + fileEncryptor.Message);
                 }
                 else
                 {

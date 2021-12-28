@@ -57,31 +57,41 @@ namespace SharpEncrypt
         public bool EncryptFile(string password, bool encryptFilename, WorkTracker tracker)
         {
             workComplete = false;
-            // Make sure encrypted result is a size divisible by the block size
-            byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
-                loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
-
-            header.SetPassword(password);
-            header.OriginalFilesize = loadedFile.Length;
-            string filename = Path.GetFileName(filepath);
-            header.SetFileExtension(Path.GetExtension(filename), password);
-            header.SetFileName(Path.GetFileNameWithoutExtension(filename), password);
-
-            var aes = new AesCryptographyService();
-            for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
+            try
             {
-                byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
-                byte[] encrypted = aes.Encrypt(current, password);
-                result.OverwriteSubset(encrypted, i);
+                // Make sure encrypted result is a size divisible by the block size
+                byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
+                    loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
 
-                if (tracker != null)
-                    tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100);
+                header.SetPassword(password);
+                header.OriginalFilesize = loadedFile.Length;
+                string filename = Path.GetFileName(filepath);
+                header.SetFileExtension(Path.GetExtension(filename), password);
+                header.SetFileName(Path.GetFileNameWithoutExtension(filename), password);
+
+                var aes = new AesCryptographyService();
+                for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
+                {
+                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
+                    byte[] encrypted = aes.Encrypt(current, password);
+                    result.OverwriteSubset(encrypted, i);
+
+                    if (tracker != null)
+                        tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100);
+                }
+
+                string directory = Path.GetDirectoryName(filepath);
+                string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
+                byte[] headerBytes = header.BuildHeader();
+                File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(headerBytes, result));
+                File.Delete(filepath);
+                message = string.Format("Encrypted {0} bytes as {1}", headerBytes.Length + result.Length, resultFilename + EXT_ENCRYPTED);
             }
-
-            string directory = Path.GetDirectoryName(filepath);
-            string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
-            File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(header.BuildHeader(), result));
-            File.Delete(filepath);
+            catch (Exception e)
+            {
+                message = e.Message;
+                return false;
+            }
             workComplete = true;
             return true;
         }
@@ -92,36 +102,37 @@ namespace SharpEncrypt
             try
             {
                 header.ParseHeader(loadedFile, password);
+
+                if (!ValidateChecksum(password))
+                {
+                    message = "Checksum mismatch. Check that you entered the correct password and try again.";
+                    return false;
+                }
+
+                byte[] result = new byte[header.OriginalFilesize];
+                int headerSize = header.HeaderSize;
+
+                var aes = new AesCryptographyService();
+                for (int i = headerSize; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
+                {
+                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
+                    byte[] decrypted = aes.Decrypt(current, password);
+                    result.OverwriteSubset(decrypted, i - headerSize);
+
+                    if (tracker != null)
+                        tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100);
+                }
+
+                string directory = Path.GetDirectoryName(filepath);
+                File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
+                File.Delete(filepath);
+                message = string.Format("Decrypted {0} bytes as {1}", result.Length, header.FileName + header.FileExtension);
             }
             catch (Exception e)
             {
                 message = e.Message;
                 return false;
             }
-            
-            if (!ValidateChecksum(password))
-            {
-                message = "Checksum mismatch. Check that you entered the correct password and try again.";
-                return false;
-            }
-
-            byte[] result = new byte[header.OriginalFilesize];
-            int headerSize = header.HeaderSize;
-
-            var aes = new AesCryptographyService();
-            for (int i = headerSize; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
-            {
-                byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
-                byte[] decrypted = aes.Decrypt(current, password);
-                result.OverwriteSubset(decrypted, i - headerSize);
-
-                if (tracker != null)
-                    tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100);
-            }
-
-            string directory = Path.GetDirectoryName(filepath);
-            File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
-            File.Delete(filepath);
             workComplete = true;
             return true;
         }

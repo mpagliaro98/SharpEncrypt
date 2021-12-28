@@ -23,7 +23,7 @@
                 <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5">Open file</Button>
+                <Button Name="btnOpenFile" Click="btnOpenFile_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5">Open files</Button>
                 <Button Name="btnClearFiles" Click="btnClearFiles_Click" HorizontalAlignment="Center" Padding="5,0" Margin="5">Clear all files</Button>
             </StackPanel>
             <DockPanel Grid.Row="1">
