@@ -73,19 +73,48 @@ namespace SharpEncrypt
         private void UpdateUI()
         {
             listboxFiles.ClearItems();
+            int i = 0;
             foreach (FileInfo file in model.Files)
             {
                 TextBlock tb = new TextBlock()
                 {
                     Text = file.FileName + " (" + string.Format("{0:0.00}", file.FileSizeMB) + "MB)",
                     TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness() { Left = 5, Right = 5 }
+                    Margin = new Thickness() { Left = 5, Right = 5 },
+                    Tag = i
                 };
+                
+                MenuItem item = new MenuItem()
+                {
+                    Header = "Remove"
+                };
+                item.Click += fileContextMenuRemove_Click;
+                ContextMenu cm = new ContextMenu();
+                cm.Items.Add(item);
+                tb.ContextMenu = cm;
+
                 listboxFiles.AddItem(tb);
+                i++;
             }
             btnEncrypt.IsEnabled = model.NumFiles > 0;
             btnDecrypt.IsEnabled = model.NumFiles > 0;
             btnClearFiles.IsEnabled = model.NumFiles > 0;
+        }
+
+        private void fileContextMenuRemove_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MenuItem item = sender as MenuItem;
+                TextBlock parent = (item.Parent as ContextMenu).PlacementTarget as TextBlock;
+                int idx = (int)parent.Tag;
+                model.RemoveFile(idx);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            UpdateUI();
         }
 
         private void btnEncrypt_Click(object sender, RoutedEventArgs e)

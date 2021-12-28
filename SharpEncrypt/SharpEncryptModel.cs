@@ -51,6 +51,11 @@ namespace SharpEncrypt
             return false;
         }
 
+        public void RemoveFile(int idx)
+        {
+            fileEncryptors.RemoveAt(idx);
+        }
+
         public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
