@@ -41,6 +41,16 @@ namespace SharpEncrypt
             fileEncryptors.Add(new FileEncryptor(filepath));
         }
 
+        public bool ContainsFile(string filepath)
+        {
+            foreach (FileEncryptor fileEncryptor in fileEncryptors)
+            {
+                if (fileEncryptor.Filepath.Equals(filepath))
+                    return true;
+            }
+            return false;
+        }
+
         public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null)
         {
             foreach (FileEncryptor fileEncryptor in fileEncryptors)
@@ -93,6 +103,18 @@ namespace SharpEncrypt
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText("\n");
             }
+        }
+
+        public void RemoveCompleteFiles()
+        {
+            List<FileEncryptor> toRemove = new List<FileEncryptor>();
+            foreach (FileEncryptor fileEncryptor in fileEncryptors)
+            {
+                if (fileEncryptor.WorkComplete)
+                    toRemove.Add(fileEncryptor);
+            }
+            foreach (var item in toRemove)
+                fileEncryptors.Remove(item);
         }
     }
 }

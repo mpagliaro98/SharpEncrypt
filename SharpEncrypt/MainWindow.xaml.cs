@@ -25,9 +25,18 @@ namespace SharpEncrypt
     {
         private SharpEncryptModel model = new SharpEncryptModel();
 
+        // property for when output text changes
+        DependencyPropertyDescriptor dp = DependencyPropertyDescriptor.FromProperty(
+             TextBlock.TextProperty,
+             typeof(TextBlock));
+
         public MainWindow()
         {
             InitializeComponent();
+            dp.AddValueChanged(textblockOutput, (sender, args) =>
+            {
+                scrollViewerOutput.ScrollToEnd();
+            });
             UpdateUI();
         }
 
@@ -37,19 +46,25 @@ namespace SharpEncrypt
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
-                // TODO: WORK WITH FOLDERS AND FILES
-                model.ClearFiles();
-                foreach (string filename in openFileDialog.FileNames)
+                // TODO: WORK WITH FOLDERS
+                foreach (string filepath in openFileDialog.FileNames)
                 {
-                    model.AddFile(filename);
+                    if (!model.ContainsFile(filepath))
+                        model.AddFile(filepath);
                 }
                 UpdateUI();
             }
         }
 
-        private void Reset()
+        private void btnClearFiles_Click(object sender, RoutedEventArgs e)
         {
             model.ClearFiles();
+            UpdateUI();
+        }
+
+        private void Reset()
+        {
+            model.RemoveCompleteFiles();
             textboxPassword.Text = "";
             progressBar.Value = progressBar.Minimum;
             UpdateUI();
@@ -70,6 +85,7 @@ namespace SharpEncrypt
             }
             btnEncrypt.IsEnabled = model.NumFiles > 0;
             btnDecrypt.IsEnabled = model.NumFiles > 0;
+            btnClearFiles.IsEnabled = model.NumFiles > 0;
         }
 
         private void btnEncrypt_Click(object sender, RoutedEventArgs e)
@@ -108,7 +124,7 @@ namespace SharpEncrypt
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show("Task complete.");
+            MessageBox.Show("All files processed. See the output window for the status of each.");
             PrimaryWindow.IsEnabled = true;
             Reset();
         }

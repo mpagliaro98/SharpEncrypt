@@ -16,6 +16,7 @@ namespace SharpEncrypt
         private byte[] loadedFile;
         private Header header = new Header();
         private string message = "";
+        private bool workComplete = false;
 
         public string Filepath
         {
@@ -30,6 +31,11 @@ namespace SharpEncrypt
         public string Message
         {
             get { return message; }
+        }
+
+        public bool WorkComplete
+        {
+            get { return workComplete; }
         }
 
         public FileEncryptor() { }
@@ -50,6 +56,7 @@ namespace SharpEncrypt
 
         public bool EncryptFile(string password, bool encryptFilename, WorkTracker tracker)
         {
+            workComplete = false;
             // Make sure encrypted result is a size divisible by the block size
             byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
                 loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
@@ -75,11 +82,13 @@ namespace SharpEncrypt
             string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
             File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(header.BuildHeader(), result));
             File.Delete(filepath);
+            workComplete = true;
             return true;
         }
 
         public bool DecryptFile(string password, WorkTracker tracker)
         {
+            workComplete = false;
             try
             {
                 header.ParseHeader(loadedFile, password);
@@ -113,6 +122,7 @@ namespace SharpEncrypt
             string directory = Path.GetDirectoryName(filepath);
             File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
             File.Delete(filepath);
+            workComplete = true;
             return true;
         }
     }
