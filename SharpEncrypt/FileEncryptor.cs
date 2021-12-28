@@ -60,8 +60,8 @@ namespace SharpEncrypt
             try
             {
                 // Make sure encrypted result is a size divisible by the block size
-                byte[] result = new byte[loadedFile.Length % AesCryptographyService.BLOCK_SIZE == 0 ? loadedFile.Length :
-                    loadedFile.Length + (AesCryptographyService.BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.BLOCK_SIZE))];
+                byte[] result = new byte[loadedFile.Length % AesCryptographyService.DEFAULT_BLOCK_SIZE == 0 ? loadedFile.Length :
+                    loadedFile.Length + (AesCryptographyService.DEFAULT_BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.DEFAULT_BLOCK_SIZE))];
 
                 header.SetPassword(password);
                 header.OriginalFilesize = loadedFile.Length;
@@ -70,14 +70,14 @@ namespace SharpEncrypt
                 header.SetFileName(Path.GetFileNameWithoutExtension(filename), password);
 
                 var aes = new AesCryptographyService();
-                for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
+                for (int i = 0; i < loadedFile.Length; i += AesCryptographyService.DEFAULT_BLOCK_SIZE)
                 {
-                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
+                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.DEFAULT_BLOCK_SIZE);
                     byte[] encrypted = aes.Encrypt(current, password);
                     result.OverwriteSubset(encrypted, i);
 
                     if (tracker != null)
-                        tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE) / loadedFile.Length * 100);
+                        tracker.ReportProgress((double)(i + AesCryptographyService.DEFAULT_BLOCK_SIZE) / loadedFile.Length * 100);
                 }
 
                 string directory = Path.GetDirectoryName(filepath);
@@ -113,14 +113,14 @@ namespace SharpEncrypt
                 int headerSize = header.HeaderSize;
 
                 var aes = new AesCryptographyService();
-                for (int i = headerSize; i < loadedFile.Length; i += AesCryptographyService.BLOCK_SIZE)
+                for (int i = headerSize; i < loadedFile.Length; i += AesCryptographyService.DEFAULT_BLOCK_SIZE)
                 {
-                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.BLOCK_SIZE);
+                    byte[] current = loadedFile.RangeSubset(i, AesCryptographyService.DEFAULT_BLOCK_SIZE);
                     byte[] decrypted = aes.Decrypt(current, password);
                     result.OverwriteSubset(decrypted, i - headerSize);
 
                     if (tracker != null)
-                        tracker.ReportProgress((double)(i + AesCryptographyService.BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100);
+                        tracker.ReportProgress((double)(i + AesCryptographyService.DEFAULT_BLOCK_SIZE - headerSize) / (loadedFile.Length - headerSize) * 100);
                 }
 
                 string directory = Path.GetDirectoryName(filepath);

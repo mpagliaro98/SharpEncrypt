@@ -10,7 +10,7 @@ namespace SharpEncrypt
 {
     public class AesCryptographyService
     {
-        public static int BLOCK_SIZE = 16;
+        public static ushort DEFAULT_BLOCK_SIZE = 16;
         private readonly byte[] masterKey = new byte[16] { 0x76, 0x4E, 0x12, 0x08, 0x4A, 0xFF, 0x93, 0xA1, 0xE5, 0x79, 0x35, 0x30, 0x60, 0x8B, 0x95, 0x2B };
         private readonly byte[] iv = new byte[16] { 0x23, 0x1C, 0xCE, 0x8F, 0x1D, 0x05, 0x47, 0x53, 0x8E, 0x98, 0x1D, 0x3F, 0xBE, 0xF2, 0xA8, 0x9D };
 
@@ -35,8 +35,8 @@ namespace SharpEncrypt
         {
             using (var aes = Aes.Create())
             {
-                aes.KeySize = BLOCK_SIZE * 8;
-                aes.BlockSize = BLOCK_SIZE * 8;
+                aes.KeySize = 128;
+                aes.BlockSize = DEFAULT_BLOCK_SIZE * 8;
                 aes.Padding = PaddingMode.Zeros;
 
                 aes.Key = key;
@@ -70,8 +70,8 @@ namespace SharpEncrypt
         {
             using (var aes = Aes.Create())
             {
-                aes.KeySize = BLOCK_SIZE * 8;
-                aes.BlockSize = BLOCK_SIZE * 8;
+                aes.KeySize = 128;
+                aes.BlockSize = DEFAULT_BLOCK_SIZE * 8;
                 aes.Padding = PaddingMode.Zeros;
 
                 aes.Key = key;

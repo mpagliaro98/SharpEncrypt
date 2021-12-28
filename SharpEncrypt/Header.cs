@@ -23,12 +23,12 @@ namespace SharpEncrypt
         private const byte VERSION_INDEV2 = 0x02;
         private static readonly byte CURRENT_VERSION = VERSION_INDEV2;
 
-        private byte[] checksum = new byte[AesCryptographyService.BLOCK_SIZE];
+        private byte[] checksum = new byte[AesCryptographyService.DEFAULT_BLOCK_SIZE];
         private int filesize = 0;
         private string extension = "";
-        private byte[] extensionEncrypted = new byte[AesCryptographyService.BLOCK_SIZE];
+        private byte[] extensionEncrypted = new byte[AesCryptographyService.DEFAULT_BLOCK_SIZE];
         private string filename = "";
-        private byte[] filenameEncrypted = new byte[AesCryptographyService.BLOCK_SIZE];
+        private byte[] filenameEncrypted = new byte[AesCryptographyService.DEFAULT_BLOCK_SIZE];
         private int contentStartIdx = 0;
 
         public ushort HeaderSize
