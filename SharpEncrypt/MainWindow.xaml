@@ -13,6 +13,7 @@
             </MenuItem>
             <MenuItem Header="_Options">
                 <MenuItem x:Name="menuReg" Header="_Use context menu items in Windows Explorer" IsCheckable="True" IsChecked="False" ToolTip="Right-click files in Explorer for quick Encrypt and Decrypt options" Click="menuReg_Click" />
+                <MenuItem x:Name="menuLog" Header="_Log output to a file" IsCheckable="True" IsChecked="False" Click="menuLog_Click" />
             </MenuItem>
         </Menu>
         <Grid>

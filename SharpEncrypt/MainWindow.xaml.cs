@@ -25,6 +25,7 @@ namespace SharpEncrypt
     public partial class MainWindow : Window
     {
         private SharpEncryptModel model = new SharpEncryptModel();
+        private Settings settings = new Settings();
 
         // property for when output text changes
         DependencyPropertyDescriptor dp = DependencyPropertyDescriptor.FromProperty(
@@ -127,6 +128,7 @@ namespace SharpEncrypt
             btnDecrypt.IsEnabled = model.NumFiles > 0;
             btnClearFiles.IsEnabled = model.NumFiles > 0;
             menuReg.IsChecked = RegistryManager.DoMenuItemsExist();
+            menuLog.IsChecked = settings.LogToFile;
         }
 
         private void fileContextMenuRemove_Click(object sender, RoutedEventArgs e)
@@ -174,6 +176,7 @@ namespace SharpEncrypt
             Tuple<string, EncryptOptions> args = e.Argument as Tuple<string, EncryptOptions>;
             string password = args.Item1;
             EncryptOptions options = args.Item2;
+            textblockOutput.LogToFile = settings.LogToFile;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
             model.EncryptAllFiles(password, options, tracker);
@@ -188,6 +191,7 @@ namespace SharpEncrypt
         {
             System.Windows.MessageBox.Show("All files processed. See the output window for the status of each.");
             PrimaryWindow.IsEnabled = true;
+            textblockOutput.OperationComplete = true;
             Reset();
         }
 
@@ -213,6 +217,7 @@ namespace SharpEncrypt
         {
             BackgroundWorkerTracker worker = sender as BackgroundWorkerTracker;
             string password = e.Argument as string;
+            textblockOutput.LogToFile = settings.LogToFile;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
             model.DecryptAllFiles(password, new EncryptOptions(), tracker);
@@ -238,6 +243,12 @@ namespace SharpEncrypt
                 System.Windows.MessageBox.Show(this, ex.ToString());
                 item.IsChecked = false;
             }
+        }
+
+        private void menuLog_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.MenuItem item = sender as System.Windows.Controls.MenuItem;
+            settings.LogToFile = item.IsChecked;
         }
     }
 }
