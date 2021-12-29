@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -65,6 +66,36 @@ namespace SharpEncrypt
         public static void OverwriteSubset<T>(this T[] array, T[] newData, int startIndex)
         {
             Array.Copy(newData, 0, array, startIndex, Math.Min(newData.Length, array.Length - startIndex));
+        }
+
+        public static bool IsDirectory(string filepath)
+        {
+            FileAttributes attr = File.GetAttributes(filepath);
+            return attr.HasFlag(FileAttributes.Directory);
+        }
+
+        public static long DirectorySize(DirectoryInfo d)
+        {
+            long size = 0;
+            // Add file sizes
+            IEnumerable<System.IO.FileInfo> fis = d.EnumerateFiles();
+            foreach (System.IO.FileInfo fi in fis)
+                size += fi.Length;
+            // Add subdirectory sizes
+            IEnumerable<DirectoryInfo> dis = d.EnumerateDirectories();
+            foreach (DirectoryInfo di in dis)
+                size += DirectorySize(di);
+            return size;
+        }
+
+        public static string ToBase64StringSafe(byte[] input)
+        {
+            return Convert.ToBase64String(input).Replace("/", "_").Replace("+", "-");
+        }
+
+        public static byte[] FromBase64StringSafe(string input)
+        {
+            return Convert.FromBase64String(input.Replace("-", "+").Replace("_", "/"));
         }
     }
 }

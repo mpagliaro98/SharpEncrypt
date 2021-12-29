@@ -11,14 +11,14 @@ namespace SharpEncrypt
 {
     public class SharpEncryptModel
     {
-        private List<FileEncryptor> fileEncryptors = new List<FileEncryptor>();
+        private List<FileEncryptorBase> fileEncryptors = new List<FileEncryptorBase>();
 
         public List<FileInfo> Files
         {
             get
             {
                 List<FileInfo> fileList = new List<FileInfo>();
-                foreach (FileEncryptor file in fileEncryptors)
+                foreach (FileEncryptorBase file in fileEncryptors)
                 {
                     fileList.Add(new FileInfo(file.Filepath));
                 }
@@ -41,11 +41,16 @@ namespace SharpEncrypt
             fileEncryptors.Add(new FileEncryptor(filepath));
         }
 
+        public void AddFolder(string path)
+        {
+            fileEncryptors.Add(new FolderEncryptor(path));
+        }
+
         public bool ContainsFile(string filepath)
         {
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
+            foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
             {
-                if (fileEncryptor.Filepath.Equals(filepath))
+                if (fileEncryptor.ContainsFile(filepath))
                     return true;
             }
             return false;
@@ -58,62 +63,20 @@ namespace SharpEncrypt
 
         public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null)
         {
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
-            {
-                if (tracker != null)
-                    tracker.OutputBuffer.AppendText("Encrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                bool result = fileEncryptor.EncryptFile(password, encryptFilename, tracker);
-                sw.Stop();
-                TimeSpan ts = sw.Elapsed;
-                string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
-                if (result)
-                {
-                    if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ") --- " + fileEncryptor.Message);
-                }
-                else
-                {
-                    if (tracker != null)
-                        tracker.OutputBuffer.AppendText(fileEncryptor.Message);
-                }
-                if (tracker != null)
-                    tracker.OutputBuffer.AppendText("\n");
-            }
+            foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
+                fileEncryptor.Encrypt(password, encryptFilename, tracker);
         }
 
         public void DecryptAllFiles(string password, WorkTracker tracker = null)
         {
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
-            {
-                if (tracker != null)
-                    tracker.OutputBuffer.AppendText("Decrypting " + System.IO.Path.GetFileName(fileEncryptor.Filepath) + "... ");
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                bool result = fileEncryptor.DecryptFile(password, tracker);
-                sw.Stop();
-                TimeSpan ts = sw.Elapsed;
-                string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
-                if (result)
-                {
-                    if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Success. (" + timeElapsed + ") --- " + fileEncryptor.Message);
-                }
-                else
-                {
-                    if (tracker != null)
-                        tracker.OutputBuffer.AppendText(fileEncryptor.Message);
-                }
-                if (tracker != null)
-                    tracker.OutputBuffer.AppendText("\n");
-            }
+            foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
+                fileEncryptor.Decrypt(password, tracker);
         }
 
         public void RemoveCompleteFiles()
         {
-            List<FileEncryptor> toRemove = new List<FileEncryptor>();
-            foreach (FileEncryptor fileEncryptor in fileEncryptors)
+            List<FileEncryptorBase> toRemove = new List<FileEncryptorBase>();
+            foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
             {
                 if (fileEncryptor.WorkComplete)
                     toRemove.Add(fileEncryptor);

@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -42,16 +43,27 @@ namespace SharpEncrypt
 
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
             {
-                // TODO: WORK WITH FOLDERS
                 foreach (string filepath in openFileDialog.FileNames)
                 {
                     if (!model.ContainsFile(filepath))
                         model.AddFile(filepath);
                 }
+                UpdateUI();
+            }
+        }
+
+        private void btnOpenFolder_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            DialogResult result = folderBrowserDialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
+            {
+                if (!model.ContainsFile(folderBrowserDialog.SelectedPath))
+                    model.AddFolder(folderBrowserDialog.SelectedPath);
                 UpdateUI();
             }
         }
@@ -78,18 +90,18 @@ namespace SharpEncrypt
             {
                 TextBlock tb = new TextBlock()
                 {
-                    Text = file.FileName + " (" + string.Format("{0:0.00}", file.FileSizeMB) + "MB)",
+                    Text = file.GeneratePreviewText(),
                     TextWrapping = TextWrapping.Wrap,
                     Margin = new Thickness() { Left = 5, Right = 5 },
                     Tag = i
                 };
-                
-                MenuItem item = new MenuItem()
+
+                System.Windows.Controls.MenuItem item = new System.Windows.Controls.MenuItem()
                 {
                     Header = "Remove"
                 };
                 item.Click += fileContextMenuRemove_Click;
-                ContextMenu cm = new ContextMenu();
+                System.Windows.Controls.ContextMenu cm = new System.Windows.Controls.ContextMenu();
                 cm.Items.Add(item);
                 tb.ContextMenu = cm;
 
@@ -105,14 +117,14 @@ namespace SharpEncrypt
         {
             try
             {
-                MenuItem item = sender as MenuItem;
-                TextBlock parent = (item.Parent as ContextMenu).PlacementTarget as TextBlock;
+                System.Windows.Controls.MenuItem item = sender as System.Windows.Controls.MenuItem;
+                TextBlock parent = (item.Parent as System.Windows.Controls.ContextMenu).PlacementTarget as TextBlock;
                 int idx = (int)parent.Tag;
                 model.RemoveFile(idx);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message);
             }
             UpdateUI();
         }
@@ -122,7 +134,7 @@ namespace SharpEncrypt
             string password = textboxPassword.Text.Trim();
             if (password.Length <= 0)
             {
-                MessageBox.Show("A password is required.");
+                System.Windows.MessageBox.Show("A password is required.");
                 return;
             }
 
@@ -153,7 +165,7 @@ namespace SharpEncrypt
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show("All files processed. See the output window for the status of each.");
+            System.Windows.MessageBox.Show("All files processed. See the output window for the status of each.");
             PrimaryWindow.IsEnabled = true;
             Reset();
         }
@@ -163,7 +175,7 @@ namespace SharpEncrypt
             string password = textboxPassword.Text.Trim();
             if (password.Length <= 0)
             {
-                MessageBox.Show("A password is required.");
+                System.Windows.MessageBox.Show("A password is required.");
                 return;
             }
 

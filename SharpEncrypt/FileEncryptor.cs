@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,17 +9,14 @@ using System.Threading.Tasks;
 
 namespace SharpEncrypt
 {
-    public class FileEncryptor
+    public class FileEncryptor : FileEncryptorBase
     {
-        private const string EXT_ENCRYPTED = ".senc";
-
         private string filepath = "";
         private byte[] loadedFile;
         private Header header = new Header();
-        private string message = "";
         private bool workComplete = false;
 
-        public string Filepath
+        public override string Filepath
         {
             get { return filepath; }
         }
@@ -28,17 +26,10 @@ namespace SharpEncrypt
             get { return header; }
         }
 
-        public string Message
-        {
-            get { return message; }
-        }
-
-        public bool WorkComplete
+        public override bool WorkComplete
         {
             get { return workComplete; }
         }
-
-        public FileEncryptor() { }
 
         public FileEncryptor(string filepath)
         {
@@ -54,9 +45,19 @@ namespace SharpEncrypt
             return encrypted.SequenceEqual(header.Checksum);
         }
 
-        public bool EncryptFile(string password, bool encryptFilename, WorkTracker tracker)
+        public override bool ContainsFile(string filepath)
+        {
+            return this.filepath.Equals(filepath);
+        }
+
+        public override bool Encrypt(string password, bool encryptFilename, WorkTracker tracker)
         {
             workComplete = false;
+            if (tracker != null)
+                tracker.OutputBuffer.AppendText("Encrypting " + Path.GetFileName(filepath) + "... ");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             try
             {
                 // Make sure encrypted result is a size divisible by the block size
@@ -85,27 +86,45 @@ namespace SharpEncrypt
                 byte[] headerBytes = header.BuildHeader();
                 File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(headerBytes, result));
                 File.Delete(filepath);
-                message = string.Format("Encrypted {0} bytes as {1}", headerBytes.Length + result.Length, resultFilename + EXT_ENCRYPTED);
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(string.Format("Encrypted {0} bytes as {1}", headerBytes.Length + result.Length, resultFilename + EXT_ENCRYPTED));
             }
             catch (Exception e)
             {
-                message = e.Message;
+                if (tracker != null)
+                {
+                    tracker.OutputBuffer.AppendText("====================================\n");
+                    tracker.OutputBuffer.AppendText("ERROR --- " + e.Message + "\n");
+                    tracker.OutputBuffer.AppendText("====================================\n");
+                }
                 return false;
             }
+
+            sw.Stop();
+            TimeSpan ts = sw.Elapsed;
+            string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
+            if (tracker != null)
+                tracker.OutputBuffer.AppendText(" --- Success. (" + timeElapsed + ")\n");
             workComplete = true;
             return true;
         }
 
-        public bool DecryptFile(string password, WorkTracker tracker)
+        public override bool Decrypt(string password, WorkTracker tracker)
         {
             workComplete = false;
+            if (tracker != null)
+                tracker.OutputBuffer.AppendText("Decrypting " + System.IO.Path.GetFileName(filepath) + "... ");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             try
             {
                 header.ParseHeader(loadedFile, password);
 
                 if (!ValidateChecksum(password))
                 {
-                    message = "Checksum mismatch. Check that you entered the correct password and try again.";
+                    if (tracker != null)
+                        tracker.OutputBuffer.AppendText("Checksum mismatch. Check that you entered the correct password and try again.\n");
                     return false;
                 }
 
@@ -126,13 +145,25 @@ namespace SharpEncrypt
                 string directory = Path.GetDirectoryName(filepath);
                 File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
                 File.Delete(filepath);
-                message = string.Format("Decrypted {0} bytes as {1}", result.Length, header.FileName + header.FileExtension);
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(string.Format("Decrypted {0} bytes as {1}", result.Length, header.FileName + header.FileExtension));
             }
             catch (Exception e)
             {
-                message = e.Message;
+                if (tracker != null)
+                {
+                    tracker.OutputBuffer.AppendText("====================================\n");
+                    tracker.OutputBuffer.AppendText("ERROR --- " + e.Message + "\n");
+                    tracker.OutputBuffer.AppendText("====================================\n");
+                }
                 return false;
             }
+
+            sw.Stop();
+            TimeSpan ts = sw.Elapsed;
+            string timeElapsed = string.Format("{0}:{1}", ((int)Math.Floor(ts.TotalMinutes)).ToString("D2"), ts.ToString("ss\\.fff"));
+            if (tracker != null)
+                tracker.OutputBuffer.AppendText(" --- Success. (" + timeElapsed + ")\n");
             workComplete = true;
             return true;
         }

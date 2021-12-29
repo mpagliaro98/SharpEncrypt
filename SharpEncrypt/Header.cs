@@ -189,6 +189,8 @@ namespace SharpEncrypt
             this.extension = extension;
             AesCryptographyService aes = new AesCryptographyService();
             extensionEncrypted = aes.Encrypt(Util.StringEncoding.GetBytes(extension), password);
+            if (extensionEncrypted.Length <= 0)
+                extensionEncrypted = new byte[AesCryptographyService.DEFAULT_BLOCK_SIZE];
         }
 
         public void SetFileName(string filename, string password)
@@ -210,6 +212,8 @@ namespace SharpEncrypt
 
         private string DecryptHeaderBytes(byte[] source, string password)
         {
+            if (source.All(b => b.Equals(0x0)))
+                return "";
             AesCryptographyService aes = new AesCryptographyService();
             byte[] decrypted = aes.Decrypt(source, password);
             return Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
