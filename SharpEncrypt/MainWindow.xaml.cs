@@ -41,6 +41,21 @@ namespace SharpEncrypt
             UpdateUI();
         }
 
+        public void SetIncomingPath(string path)
+        {
+            if (Util.IsDirectory(path))
+            {
+                if (!model.ContainsFile(path))
+                    model.AddFolder(path);
+            }
+            else
+            {
+                if (!model.ContainsFile(path))
+                    model.AddFile(path);
+            }
+            UpdateUI();
+        }
+
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
@@ -111,6 +126,7 @@ namespace SharpEncrypt
             btnEncrypt.IsEnabled = model.NumFiles > 0;
             btnDecrypt.IsEnabled = model.NumFiles > 0;
             btnClearFiles.IsEnabled = model.NumFiles > 0;
+            menuReg.IsChecked = RegistryManager.DoMenuItemsExist();
         }
 
         private void fileContextMenuRemove_Click(object sender, RoutedEventArgs e)
@@ -200,6 +216,28 @@ namespace SharpEncrypt
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
             model.DecryptAllFiles(password, new EncryptOptions(), tracker);
+        }
+
+        private void Exit_App(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void menuReg_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Controls.MenuItem item = sender as System.Windows.Controls.MenuItem;
+            try
+            {
+                if (item.IsChecked)
+                    RegistryManager.CreateMenuItems();
+                else
+                    RegistryManager.DeleteMenuItems();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(this, ex.ToString());
+                item.IsChecked = false;
+            }
         }
     }
 }
