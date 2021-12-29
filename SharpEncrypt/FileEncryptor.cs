@@ -89,11 +89,17 @@ namespace SharpEncrypt
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText(string.Format("Encrypted {0} bytes as {1}", headerBytes.Length + result.Length, resultFilename + EXT_ENCRYPTED));
             }
+            catch (SharpEncryptException e)
+            {
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(e.Message + "\n");
+                return false;
+            }
             catch (Exception e)
             {
                 if (tracker != null)
                 {
-                    tracker.OutputBuffer.AppendText("====================================\n");
+                    tracker.OutputBuffer.AppendText("\n====================================\n");
                     tracker.OutputBuffer.AppendText("ERROR --- " + e.Message + "\n");
                     tracker.OutputBuffer.AppendText("====================================\n");
                 }
@@ -122,11 +128,7 @@ namespace SharpEncrypt
                 header.ParseHeader(loadedFile, password);
 
                 if (!ValidateChecksum(password))
-                {
-                    if (tracker != null)
-                        tracker.OutputBuffer.AppendText("Checksum mismatch. Check that you entered the correct password and try again.\n");
-                    return false;
-                }
+                    throw new SharpEncryptException("Checksum mismatch. Check that you entered the correct password and try again.");
 
                 byte[] result = new byte[header.OriginalFilesize];
                 int headerSize = header.HeaderSize;
@@ -148,11 +150,17 @@ namespace SharpEncrypt
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText(string.Format("Decrypted {0} bytes as {1}", result.Length, header.FileName + header.FileExtension));
             }
+            catch (SharpEncryptException e)
+            {
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(e.Message + "\n");
+                return false;
+            }
             catch (Exception e)
             {
                 if (tracker != null)
                 {
-                    tracker.OutputBuffer.AppendText("====================================\n");
+                    tracker.OutputBuffer.AppendText("\n====================================\n");
                     tracker.OutputBuffer.AppendText("ERROR --- " + e.Message + "\n");
                     tracker.OutputBuffer.AppendText("====================================\n");
                 }

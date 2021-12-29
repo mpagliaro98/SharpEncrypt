@@ -120,13 +120,13 @@ namespace SharpEncrypt
         public void ParseHeader(byte[] loadedFile, string password)
         {
             if (!Util.MatchByteSequence(loadedFile, 0, IDENTIFIER))
-                throw new Exception("This file is not recognized as an encrypted file and cannot be decrypted.");
+                throw new SharpEncryptException("This file is not recognized as an encrypted file and cannot be decrypted.");
 
             int idx = IDENTIFIER.Length;
             contentStartIdx = ReadUInt16FromByteArray(loadedFile, ref idx);
             byte version = loadedFile[idx++];
             if (version > CURRENT_VERSION)
-                throw new Exception("This file cannot be opened with this version of SharpEncrypt. Please use a later version.");
+                throw new SharpEncryptException("This file cannot be opened with this version of SharpEncrypt. Please use a later version.");
 
             while (idx < loadedFile.Length)
             {
@@ -150,6 +150,7 @@ namespace SharpEncrypt
                         case CODE_EXTENSION:
                             if (CURRENT_VERSION >= VERSION_INDEV2)
                             {
+                                extensionEncrypted = new byte[dataSize];
                                 ReadBytesFromByteArray(loadedFile, ref idx, extensionEncrypted, dataSize);
                                 extension = DecryptHeaderBytes(extensionEncrypted, password);
                             }
@@ -159,6 +160,7 @@ namespace SharpEncrypt
                         case CODE_FILENAME:
                             if (CURRENT_VERSION >= VERSION_INDEV2)
                             {
+                                filenameEncrypted = new byte[dataSize];
                                 ReadBytesFromByteArray(loadedFile, ref idx, filenameEncrypted, dataSize);
                                 filename = DecryptHeaderBytes(filenameEncrypted, password);
                             }

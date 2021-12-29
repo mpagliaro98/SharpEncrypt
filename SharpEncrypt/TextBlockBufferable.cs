@@ -17,6 +17,8 @@ namespace SharpEncrypt
 {
     public class TextBlockBufferable : TextBlock, IBufferable
     {
+        protected const int MAX_LENGTH = 10000;
+
         static TextBlockBufferable()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TextBlockBufferable), new FrameworkPropertyMetadata(typeof(TextBlockBufferable)));
@@ -29,6 +31,8 @@ namespace SharpEncrypt
 
         public virtual void AppendText(string text)
         {
+            if (Text.Length + text.Length >= MAX_LENGTH)
+                Text = Text.Substring(MAX_LENGTH / 10);
             Text += text;
         }
 

@@ -71,6 +71,12 @@ namespace SharpEncrypt
                 encDirName = DIR_NAME_PREFIX + Util.ToBase64StringSafe(encrypted);
                 Directory.Move(Filepath, Path.Combine(Directory.GetParent(Filepath).FullName, encDirName));
             }
+            catch (SharpEncryptException e)
+            {
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(e.Message + "\n");
+                return false;
+            }
             catch (Exception e)
             {
                 if (tracker != null)
@@ -114,6 +120,12 @@ namespace SharpEncrypt
                     dirName = Util.StringEncoding.GetString(decrypted).Replace("\0", String.Empty);
                     Directory.Move(Filepath, Path.Combine(Directory.GetParent(Filepath).FullName, dirName));
                 }
+            }
+            catch (SharpEncryptException e)
+            {
+                if (tracker != null)
+                    tracker.OutputBuffer.AppendText(e.Message + "\n");
+                return false;
             }
             catch (Exception e)
             {
