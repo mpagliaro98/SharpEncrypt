@@ -61,16 +61,16 @@ namespace SharpEncrypt
             fileEncryptors.RemoveAt(idx);
         }
 
-        public void EncryptAllFiles(string password, bool encryptFilename, WorkTracker tracker = null)
+        public void EncryptAllFiles(string password, EncryptOptions options, WorkTracker tracker = null)
         {
             foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
-                fileEncryptor.Encrypt(password, encryptFilename, tracker);
+                fileEncryptor.Encrypt(password, options, tracker);
         }
 
-        public void DecryptAllFiles(string password, WorkTracker tracker = null)
+        public void DecryptAllFiles(string password, EncryptOptions options, WorkTracker tracker = null)
         {
             foreach (FileEncryptorBase fileEncryptor in fileEncryptors)
-                fileEncryptor.Decrypt(password, tracker);
+                fileEncryptor.Decrypt(password, options, tracker);
         }
 
         public void RemoveCompleteFiles()

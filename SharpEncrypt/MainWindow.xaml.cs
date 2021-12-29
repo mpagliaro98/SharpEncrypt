@@ -143,19 +143,24 @@ namespace SharpEncrypt
             worker.DoWork += worker_DoWorkEncrypt;
             worker.ProgressChanged += worker_ProgressChanged;
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
-            worker.RunWorkerAsync(argument: new Tuple<string, bool>(password, checkboxEncryptFilename.IsChecked.Value));
+            EncryptOptions options = new EncryptOptions()
+            {
+                EncryptFilename = checkboxEncryptFilename.IsChecked.Value,
+                EncryptDirectoryName = checkboxEncryptDirname.IsChecked.Value
+            };
+            worker.RunWorkerAsync(argument: new Tuple<string, EncryptOptions>(password, options));
             PrimaryWindow.IsEnabled = false;
         }
 
         private void worker_DoWorkEncrypt(object sender, DoWorkEventArgs e)
         {
             BackgroundWorkerTracker worker = sender as BackgroundWorkerTracker;
-            Tuple<string, bool> args = e.Argument as Tuple<string, bool>;
+            Tuple<string, EncryptOptions> args = e.Argument as Tuple<string, EncryptOptions>;
             string password = args.Item1;
-            bool encryptFilename = args.Item2;
+            EncryptOptions options = args.Item2;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
-            model.EncryptAllFiles(password, encryptFilename, tracker);
+            model.EncryptAllFiles(password, options, tracker);
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -194,7 +199,7 @@ namespace SharpEncrypt
             string password = e.Argument as string;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
-            model.DecryptAllFiles(password, tracker);
+            model.DecryptAllFiles(password, new EncryptOptions(), tracker);
         }
     }
 }

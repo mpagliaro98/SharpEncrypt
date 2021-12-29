@@ -52,7 +52,7 @@ namespace SharpEncrypt
             return false;
         }
 
-        public override bool Encrypt(string password, bool encryptFilename, WorkTracker tracker)
+        public override bool Encrypt(string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -64,12 +64,15 @@ namespace SharpEncrypt
             try
             {
                 foreach (FileEncryptorBase fileEncryptor in children)
-                    fileEncryptor.Encrypt(password, encryptFilename, tracker);
+                    fileEncryptor.Encrypt(password, options, tracker);
 
-                AesCryptographyService aes = new AesCryptographyService();
-                byte[] encrypted = aes.Encrypt(Util.StringEncoding.GetBytes(DirectoryName), password);
-                encDirName = DIR_NAME_PREFIX + Util.ToBase64StringSafe(encrypted);
-                Directory.Move(Filepath, Path.Combine(Directory.GetParent(Filepath).FullName, encDirName));
+                if (options.EncryptDirectoryName)
+                {
+                    AesCryptographyService aes = new AesCryptographyService();
+                    byte[] encrypted = aes.Encrypt(Util.StringEncoding.GetBytes(DirectoryName), password);
+                    encDirName = DIR_NAME_PREFIX + Util.ToBase64StringSafe(encrypted);
+                    Directory.Move(Filepath, Path.Combine(Directory.GetParent(Filepath).FullName, encDirName));
+                }
             }
             catch (SharpEncryptException e)
             {
@@ -97,7 +100,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public override bool Decrypt(string password, WorkTracker tracker)
+        public override bool Decrypt(string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -109,7 +112,7 @@ namespace SharpEncrypt
             try
             {
                 foreach (FileEncryptorBase fileEncryptor in children)
-                    fileEncryptor.Decrypt(password, tracker);
+                    fileEncryptor.Decrypt(password, options, tracker);
                 
                 if (dirName.StartsWith(DIR_NAME_PREFIX))
                 {

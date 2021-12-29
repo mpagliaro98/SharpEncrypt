@@ -60,6 +60,7 @@
     <Compile Include="BackgroundWorkerTracker.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="EncryptOptions.cs" />
     <Compile Include="FileEncryptorBase.cs" />
     <Compile Include="FileInfo.cs" />
     <Compile Include="FolderEncryptor.cs" />

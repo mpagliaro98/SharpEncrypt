@@ -44,7 +44,10 @@
             <StackPanel Margin="5">
                 <Button Name="btnEncrypt" Click="btnEncrypt_Click" HorizontalAlignment="Center" Padding="10,5">Encrypt</Button>
                 <CheckBox x:Name="checkboxEncryptFilename" HorizontalAlignment="Left" IsChecked="True"  Padding="5,0" Margin="5,5,0,0">
-                    <TextBlock Text="Encrypt filename" TextWrapping="Wrap" />
+                    <TextBlock Text="Encrypt filenames" TextWrapping="Wrap" />
+                </CheckBox>
+                <CheckBox x:Name="checkboxEncryptDirname" HorizontalAlignment="Left" IsChecked="True"  Padding="5,0" Margin="5,5,0,0">
+                    <TextBlock Text="Encrypt directory names" TextWrapping="Wrap" />
                 </CheckBox>
             </StackPanel>
             <StackPanel Grid.Row="1" Margin="5">

@@ -50,7 +50,7 @@ namespace SharpEncrypt
             return this.filepath.Equals(filepath);
         }
 
-        public override bool Encrypt(string password, bool encryptFilename, WorkTracker tracker)
+        public override bool Encrypt(string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -82,10 +82,11 @@ namespace SharpEncrypt
                 }
 
                 string directory = Path.GetDirectoryName(filepath);
-                string resultFilename = encryptFilename ? Util.GenerateRandomString(16) : header.FileName;
+                string resultFilename = options.EncryptFilename ? Util.GenerateRandomString(16) : header.FileName;
                 byte[] headerBytes = header.BuildHeader();
                 File.WriteAllBytes(Path.Combine(directory, resultFilename + EXT_ENCRYPTED), Util.ConcatByteArrays(headerBytes, result));
-                File.Delete(filepath);
+                if (!(resultFilename + EXT_ENCRYPTED).Equals(Path.GetFileName(filepath)))
+                    File.Delete(filepath);
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText(string.Format("Encrypted {0} bytes as {1}", headerBytes.Length + result.Length, resultFilename + EXT_ENCRYPTED));
             }
@@ -115,7 +116,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public override bool Decrypt(string password, WorkTracker tracker)
+        public override bool Decrypt(string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -146,7 +147,8 @@ namespace SharpEncrypt
 
                 string directory = Path.GetDirectoryName(filepath);
                 File.WriteAllBytes(Path.Combine(directory, header.FileName + header.FileExtension), result);
-                File.Delete(filepath);
+                if (!(header.FileName + header.FileExtension).Equals(Path.GetFileName(filepath)))
+                    File.Delete(filepath);
                 if (tracker != null)
                     tracker.OutputBuffer.AppendText(string.Format("Decrypted {0} bytes as {1}", result.Length, header.FileName + header.FileExtension));
             }

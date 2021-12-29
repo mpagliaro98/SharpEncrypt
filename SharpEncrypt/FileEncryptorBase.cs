@@ -14,7 +14,7 @@ namespace SharpEncrypt
         public abstract bool WorkComplete { get; }
 
         public abstract bool ContainsFile(string filepath);
-        public abstract bool Encrypt(string password, bool encryptFilename, WorkTracker tracker);
-        public abstract bool Decrypt(string password, WorkTracker tracker);
+        public abstract bool Encrypt(string password, EncryptOptions options, WorkTracker tracker);
+        public abstract bool Decrypt(string password, EncryptOptions options, WorkTracker tracker);
     }
 }
