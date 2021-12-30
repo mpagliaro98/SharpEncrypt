@@ -10,6 +10,7 @@ namespace SharpEncrypt
 {
     public class Settings
     {
+        public const string VERSION_NUMBER = "1.0.0";
         private const string DIR_NAME = "settings";
         private const string SETTINGS_FILE = "settings.dat";
 

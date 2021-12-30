@@ -142,7 +142,7 @@ namespace SharpEncrypt
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message, "Error");
             }
             UpdateUI();
         }
@@ -152,7 +152,7 @@ namespace SharpEncrypt
             string password = textboxPassword.Text.Trim();
             if (password.Length <= 0)
             {
-                System.Windows.MessageBox.Show("A password is required.");
+                System.Windows.MessageBox.Show("A password is required.", "Error");
                 return;
             }
 
@@ -189,7 +189,7 @@ namespace SharpEncrypt
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            System.Windows.MessageBox.Show("All files processed. See the output window for the status of each.");
+            System.Windows.MessageBox.Show("All files processed. See the output window for the status of each.", "Success");
             PrimaryWindow.IsEnabled = true;
             textblockOutput.OperationComplete = true;
             Reset();
@@ -200,7 +200,7 @@ namespace SharpEncrypt
             string password = textboxPassword.Text.Trim();
             if (password.Length <= 0)
             {
-                System.Windows.MessageBox.Show("A password is required.");
+                System.Windows.MessageBox.Show("A password is required.", "Error");
                 return;
             }
 
@@ -240,7 +240,7 @@ namespace SharpEncrypt
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(this, ex.ToString());
+                System.Windows.MessageBox.Show(ex.Message + "\nAre you not running this program as administrator?", "Error");
                 item.IsChecked = false;
             }
         }
@@ -249,6 +249,25 @@ namespace SharpEncrypt
         {
             System.Windows.Controls.MenuItem item = sender as System.Windows.Controls.MenuItem;
             settings.LogToFile = item.IsChecked;
+        }
+
+        private void menuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            string text = "SharpEncrypt\nVersion: " + Settings.VERSION_NUMBER + "\n" +
+                "By: Michael Pagliaro\nGithub: github.com/mpagliaro98\n" +
+                "Contact me with issues at pagliaromichael98@gmail.com";
+            System.Windows.MessageBox.Show(text, "About");
+        }
+
+        private void menuHow_Click(object sender, RoutedEventArgs e)
+        {
+            string text = "Use the \"Open folder\" or \"Open files\" buttons to select a folder or multiple files.\n"
+                + "Type a password into the password box.\n"
+                + "Select the \"Encrypt\" button to encrypt the files.\n"
+                + "The grey output box will tell you the new name of the file, ending in .senc.\n\n"
+                + "Open an encrypted file and enter the same password, then choose \"Decrypt\" to decrypt it.\n"
+                + "Ensure the password you use is something only you know.";
+            System.Windows.MessageBox.Show(text, "How to use");
         }
     }
 }

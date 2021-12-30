@@ -21,7 +21,8 @@ namespace SharpEncrypt
         // Software versions
         private const byte VERSION_INDEV1 = 0x01;
         private const byte VERSION_INDEV2 = 0x02;
-        private static readonly byte CURRENT_VERSION = VERSION_INDEV2;
+        private const byte VERSION_RELEASE1 = 0x03;
+        private static readonly byte CURRENT_VERSION = VERSION_RELEASE1;
 
         private byte[] checksum = new byte[AesCryptographyService.DEFAULT_BLOCK_SIZE];
         private int filesize = 0;

@@ -58,7 +58,10 @@ namespace SharpEncrypt
             {
                 regmenu = Registry.ClassesRoot.CreateSubKey(subkey);
                 if (regmenu != null)
+                {
                     regmenu.SetValue("", text);
+                    regmenu.SetValue("Icon", Assembly.GetEntryAssembly().Location);
+                }
             }
             catch (Exception e)
             {
