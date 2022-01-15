@@ -48,6 +48,8 @@ namespace SharpEncrypt
 
         public void SetIncomingPath(string path)
         {
+            if (IsOperationInProgress())
+                return;
             if (Util.IsDirectory(path))
             {
                 if (!model.ContainsFile(path))
@@ -304,6 +306,11 @@ namespace SharpEncrypt
         private void menuKey_Click(object sender, RoutedEventArgs e)
         {
             SetNewMasterKeyFile();
+        }
+
+        private bool IsOperationInProgress()
+        {
+            return !PrimaryWindow.IsEnabled;
         }
     }
 }
