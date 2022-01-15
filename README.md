@@ -21,6 +21,6 @@ Several additional options can also be configured on the right side of the windo
 Other options exist on the menu at the top of the window.
 Under "File", you can change your master key file or shut down the application.
 Under "Options", you can tell the application to log its output to a file and enable/disable context menu items for Windows Explorer.
-If logging is enabled, log files will be created in the directory "[your user]/AppData/Local/mpagliaro98/SharpEncrypt/logs".
+If logging is enabled, log files will be created in the directory "Program Files (x86)/mpagliaro98/SharpEncrypt/logs".
 If context menu items are enabled, when you right-click a file or folder in Windows Explorer, you will see options to encrypt and decrypt.
 Clicking these will automatically open the application and load those files in.
