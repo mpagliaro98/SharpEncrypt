@@ -181,10 +181,10 @@ namespace SharpEncrypt
             }
         }
 
-        public void SetPassword(string password)
+        public void SetPassword(byte[] masterKey, string password)
         {
             AesCryptographyService aes = new AesCryptographyService();
-            checksum = aes.Encrypt(Util.StringEncoding.GetBytes(password));
+            checksum = aes.Encrypt(Util.StringEncoding.GetBytes(password), masterKey);
         }
 
         public void SetFileExtension(string extension, string password)

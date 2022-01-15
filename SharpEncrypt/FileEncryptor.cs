@@ -38,10 +38,10 @@ namespace SharpEncrypt
             this.filepath = filepath;
         }
 
-        private bool ValidateChecksum(string password)
+        private bool ValidateChecksum(byte[] masterKey, string password)
         {
             AesCryptographyService aes = new AesCryptographyService();
-            byte[] encrypted = aes.Encrypt(Util.StringEncoding.GetBytes(password));
+            byte[] encrypted = aes.Encrypt(Util.StringEncoding.GetBytes(password), masterKey);
             return encrypted.SequenceEqual(header.Checksum);
         }
 
@@ -50,7 +50,7 @@ namespace SharpEncrypt
             return this.filepath.Equals(filepath);
         }
 
-        public override bool Encrypt(string password, EncryptOptions options, WorkTracker tracker)
+        public override bool Encrypt(byte[] masterKey, string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -64,7 +64,7 @@ namespace SharpEncrypt
                 byte[] result = new byte[loadedFile.Length % AesCryptographyService.DEFAULT_BLOCK_SIZE == 0 ? loadedFile.Length :
                     loadedFile.Length + (AesCryptographyService.DEFAULT_BLOCK_SIZE - (loadedFile.Length % AesCryptographyService.DEFAULT_BLOCK_SIZE))];
 
-                header.SetPassword(password);
+                header.SetPassword(masterKey, password);
                 header.OriginalFilesize = loadedFile.Length;
                 string filename = Path.GetFileName(filepath);
                 header.SetFileExtension(Path.GetExtension(filename), password);
@@ -116,7 +116,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public override bool Decrypt(string password, EncryptOptions options, WorkTracker tracker)
+        public override bool Decrypt(byte[] masterKey, string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -128,7 +128,7 @@ namespace SharpEncrypt
             {
                 header.ParseHeader(loadedFile, password);
 
-                if (!ValidateChecksum(password))
+                if (!ValidateChecksum(masterKey, password))
                     throw new SharpEncryptException("Checksum mismatch. Check that you entered the correct password and try again.");
 
                 byte[] result = new byte[header.OriginalFilesize];

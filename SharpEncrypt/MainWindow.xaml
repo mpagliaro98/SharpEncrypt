@@ -9,6 +9,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem x:Name="menuKey" Header="_Set new master key file" IsCheckable="False" Click="menuKey_Click" />
                 <MenuItem Header="_Exit" Click="Exit_App" />
             </MenuItem>
             <MenuItem Header="_Options">

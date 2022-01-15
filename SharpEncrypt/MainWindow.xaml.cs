@@ -40,6 +40,10 @@ namespace SharpEncrypt
                 scrollViewerOutput.ScrollToEnd();
             });
             UpdateUI();
+            if (!settings.MasterKeyFileExists())
+            {
+                SetNewMasterKeyFile();
+            }
         }
 
         public void SetIncomingPath(string path)
@@ -179,7 +183,7 @@ namespace SharpEncrypt
             textblockOutput.LogToFile = settings.LogToFile;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
-            model.EncryptAllFiles(password, options, tracker);
+            model.EncryptAllFiles(settings.MasterKey, password, options, tracker);
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -220,7 +224,7 @@ namespace SharpEncrypt
             textblockOutput.LogToFile = settings.LogToFile;
             OutputBuffer buffer = new OutputBuffer(textblockOutput);
             WorkTracker tracker = new WorkTracker(worker, buffer);
-            model.DecryptAllFiles(password, new EncryptOptions(), tracker);
+            model.DecryptAllFiles(settings.MasterKey, password, new EncryptOptions(), tracker);
         }
 
         private void Exit_App(object sender, RoutedEventArgs e)
@@ -268,6 +272,38 @@ namespace SharpEncrypt
                 + "Open an encrypted file and enter the same password, then choose \"Decrypt\" to decrypt it.\n"
                 + "Ensure the password you use is something only you know.";
             System.Windows.MessageBox.Show(text, "How to use");
+        }
+
+        private void SetNewMasterKeyFile()
+        {
+            settings.PathToMasterKey = "";
+            System.Windows.MessageBox.Show("A master key file is required. You will be prompted to supply this program with a .key file. If you are sharing encrypted files with someone else, you both must use the same .key file, otherwise the decryption process may corrupt the file.", "First Time Setup");
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filepath = openFileDialog.FileName;
+                if (filepath != "" && File.Exists(filepath))
+                {
+                    try
+                    {
+                        settings.PathToMasterKey = filepath;
+                    }
+                    catch (SharpEncryptException e)
+                    {
+                        System.Windows.MessageBox.Show(e.Message, "Error");
+                        System.Windows.Application.Current.Shutdown();
+                    }
+                }
+            }
+            else
+            {
+                System.Windows.Application.Current.Shutdown();
+            }
+        }
+
+        private void menuKey_Click(object sender, RoutedEventArgs e)
+        {
+            SetNewMasterKeyFile();
         }
     }
 }

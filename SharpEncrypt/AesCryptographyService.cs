@@ -11,13 +11,7 @@ namespace SharpEncrypt
     public class AesCryptographyService
     {
         public static ushort DEFAULT_BLOCK_SIZE = 16;
-        private readonly byte[] masterKey = new byte[16] { 0x76, 0x4E, 0x12, 0x08, 0x4A, 0xFF, 0x93, 0xA1, 0xE5, 0x79, 0x35, 0x30, 0x60, 0x8B, 0x95, 0x2B };
         private readonly byte[] iv = new byte[16] { 0x23, 0x1C, 0xCE, 0x8F, 0x1D, 0x05, 0x47, 0x53, 0x8E, 0x98, 0x1D, 0x3F, 0xBE, 0xF2, 0xA8, 0x9D };
-
-        public byte[] Encrypt(byte[] data)
-        {
-            return Encrypt(data, masterKey, iv);
-        }
 
         public byte[] Encrypt(byte[] data, string password)
         {
@@ -47,11 +41,6 @@ namespace SharpEncrypt
                     return PerformCryptography(data, encryptor);
                 }
             }
-        }
-
-        public byte[] Decrypt(byte[] data)
-        {
-            return Decrypt(data, masterKey, iv);
         }
 
         public byte[] Decrypt(byte[] data, string password)

@@ -52,7 +52,7 @@ namespace SharpEncrypt
             return false;
         }
 
-        public override bool Encrypt(string password, EncryptOptions options, WorkTracker tracker)
+        public override bool Encrypt(byte[] masterKey, string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -64,7 +64,7 @@ namespace SharpEncrypt
             try
             {
                 foreach (FileEncryptorBase fileEncryptor in children)
-                    fileEncryptor.Encrypt(password, options, tracker);
+                    fileEncryptor.Encrypt(masterKey, password, options, tracker);
 
                 if (options.EncryptDirectoryName)
                 {
@@ -100,7 +100,7 @@ namespace SharpEncrypt
             return true;
         }
 
-        public override bool Decrypt(string password, EncryptOptions options, WorkTracker tracker)
+        public override bool Decrypt(byte[] masterKey, string password, EncryptOptions options, WorkTracker tracker)
         {
             workComplete = false;
             if (tracker != null)
@@ -112,7 +112,7 @@ namespace SharpEncrypt
             try
             {
                 foreach (FileEncryptorBase fileEncryptor in children)
-                    fileEncryptor.Decrypt(password, options, tracker);
+                    fileEncryptor.Decrypt(masterKey, password, options, tracker);
                 
                 if (dirName.StartsWith(DIR_NAME_PREFIX))
                 {
