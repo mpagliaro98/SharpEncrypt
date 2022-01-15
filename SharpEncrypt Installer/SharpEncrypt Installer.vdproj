@@ -28,13 +28,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_CA0F58394F03C7A36E550F898DE2DC34"
+        "OwnerKey" = "8:_DA1AAC29E23A4DC7AEAA0365A503BF91"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DA1AAC29E23A4DC7AEAA0365A503BF91"
+        "OwnerKey" = "8:_CA0F58394F03C7A36E550F898DE2DC34"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -55,6 +55,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -71,6 +79,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -187,15 +203,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SharpEncrypt"
-        "ProductCode" = "8:{CD4695C7-C2EC-4C8F-B2C8-79DE73D5A4D3}"
-        "PackageCode" = "8:{FE3D1ACE-965C-4F85-A258-92720E7A1CB9}"
+        "ProductCode" = "8:{08C8449E-6E3A-405C-9F07-56A31CCC2236}"
+        "PackageCode" = "8:{7F276310-5535-49DE-A85C-F2676B0B69D2}"
         "UpgradeCode" = "8:{6408F18B-3792-4A3D-9DA7-AADBD89C05A2}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.1.0"
         "Manufacturer" = "8:mpagliaro98"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -737,7 +753,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DA1AAC29E23A4DC7AEAA0365A503BF91"
             {
-            "SourcePath" = "8:..\\SharpEncrypt\\obj\\Release\\SharpEncrypt.exe"
+            "SourcePath" = "8:"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_13D99C2ACACB49E382B9D6B9E4B99811"
